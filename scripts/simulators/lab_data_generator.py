@@ -53,12 +53,14 @@ def generate_csv():
     with open(filename, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(headers)
+        now = datetime.now()
         
         # Générer 5 échantillons
         for i in range(5):
             writer.writerow([
                 f"SAMP-{random.randint(1000,9999)}",
                 datetime.now().isoformat(),
+                now.astimezone(timezone.utc).isoformat().replace("T", " "),
                 f"BATCH-2025-{random.choice(['A','B','C'])}",
                 f"{random.randint(100000, 1000000)}", # UFC/g
                 round(random.uniform(0.5, 1.8), 2),    # % Huile

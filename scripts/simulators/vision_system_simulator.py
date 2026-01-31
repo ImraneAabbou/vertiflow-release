@@ -48,10 +48,11 @@ def generate_vision_data(batch_id):
     # Simulation d'une croissance exponentielle (Sigmoïde)
     days_growth = random.randint(1, 30)
     biomass = 5 * (1.15 ** days_growth) # Croissance rapide
+    now = datetime.now(timezone.utc)
     
     return {
         "source": "VISION_AI_EDGE_01",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": now.astimezone(timezone.utc).isoformat().replace("T", " "),
         "batch_id": batch_id,
         "fresh_biomass_est": round(biomass, 1),
         "leaf_area_index_lai": round(biomass / 50, 2),

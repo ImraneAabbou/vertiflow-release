@@ -91,7 +91,7 @@ def generate_telemetry(rack_id, module_id, zone_id):
     
     # --- I. IDENTIFICATION ---
     telemetry = {
-        "timestamp": now.astimezone(timezone.utc).isoformat(),
+        "timestamp": now.astimezone(timezone.utc).isoformat().replace("T", " "),
         "sensor_hardware_id": f"SN-{rack_id}-{module_id}",
         "rack_id": rack_id,
         "module_id": module_id,

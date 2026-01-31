@@ -331,7 +331,7 @@ def generate_nutrient_telemetry(zone_id: str, tank_id: str) -> Dict[str, Any]:
 
     telemetry = {
         # Identification
-        "timestamp": now.isoformat(),
+        "timestamp": now.astimezone(timezone.utc).isoformat().replace("T", " "),
         "farm_id": FARM_CONFIG["farm_id"],
         "zone_id": zone_id,
         "tank_id": tank_id,

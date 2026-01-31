@@ -315,7 +315,7 @@ def generate_led_telemetry(rack_id: str, level: int, zone_id: str) -> Dict[str, 
 
     telemetry = {
         # Identification
-        "timestamp": now.isoformat(),
+        "timestamp": now.astimezone(timezone.utc).isoformat().replace("T", " "),
         "farm_id": FARM_CONFIG["farm_id"],
         "rack_id": rack_id,
         "level_index": level,
