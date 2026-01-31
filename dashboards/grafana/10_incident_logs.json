@@ -1,0 +1,187 @@
+{
+  "annotations": { "list": [] },
+  "description": "Dashboard des Logs d Incidents - Suivi, Alertes et Historique",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "type": "row",
+      "title": "Vue d Ensemble des Incidents",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Incidents Ouverts",
+      "gridPos": { "h": 5, "w": 4, "x": 0, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.incident_logs WHERE toString(status) = 'open'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "red", "mode": "fixed" }, "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "En Cours",
+      "gridPos": { "h": 5, "w": 4, "x": 4, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.incident_logs WHERE toString(status) = 'in_progress'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "orange", "mode": "fixed" } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Resolus",
+      "gridPos": { "h": 5, "w": 4, "x": 8, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.incident_logs WHERE toString(status) = 'resolved'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "green", "mode": "fixed" } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Planifies",
+      "gridPos": { "h": 5, "w": 4, "x": 12, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.incident_logs WHERE toString(status) = 'scheduled'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "blue", "mode": "fixed" } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Critiques Non Resolus",
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.incident_logs WHERE toString(severity) = 'critical' AND toString(status) != 'resolved'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "dark-red", "mode": "fixed" }, "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Total Incidents",
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.incident_logs", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "purple", "mode": "fixed" } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "row",
+      "title": "Analyse des Incidents",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "collapsed": false
+    },
+    {
+      "type": "piechart",
+      "title": "Repartition par Severite",
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 7 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT toString(severity) as severite, count() as nombre FROM vertiflow.incident_logs GROUP BY severity", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "values": ["value", "percent"] }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true } }
+    },
+    {
+      "type": "piechart",
+      "title": "Repartition par Statut",
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 7 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT toString(status) as statut, count() as nombre FROM vertiflow.incident_logs GROUP BY status", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "values": ["value", "percent"] }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true } }
+    },
+    {
+      "type": "piechart",
+      "title": "Repartition par Type",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 7 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT type as type_incident, count() as nombre FROM vertiflow.incident_logs GROUP BY type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "values": ["value"] }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true } }
+    },
+    {
+      "type": "barchart",
+      "title": "Incidents par Zone",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 7 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT zone_id as Zone, count() as incidents FROM vertiflow.incident_logs WHERE zone_id != 'ALL' GROUP BY zone_id ORDER BY incidents DESC", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "row",
+      "title": "Attribution et Responsables",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
+      "collapsed": false
+    },
+    {
+      "type": "barchart",
+      "title": "Charge par Technicien",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT assigned_to as Technicien, count() as incidents FROM vertiflow.incident_logs WHERE toString(status) IN ('open', 'in_progress') GROUP BY assigned_to ORDER BY incidents DESC", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "table",
+      "title": "Statistiques par Technicien",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT assigned_to as Technicien, countIf(toString(status) = 'open') as Ouverts, countIf(toString(status) = 'in_progress') as En_Cours, countIf(toString(status) = 'resolved') as Resolus, countIf(toString(severity) = 'critical') as Critiques, count() as Total FROM vertiflow.incident_logs GROUP BY assigned_to ORDER BY Total DESC", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "center" } } }
+    },
+    {
+      "type": "row",
+      "title": "Incidents Actifs - Attention Requise",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "collapsed": false
+    },
+    {
+      "type": "table",
+      "title": "Incidents CRITIQUES Actifs",
+      "description": "Incidents critiques necessitant une intervention immediate",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 23 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT incident_id as ID, timestamp as Date, zone_id as Zone, rack_id as Rack, sensor_id as Capteur, title as Titre, description as Description, toString(status) as Statut, assigned_to as Assigne, affected_plants as Plantes, estimated_loss as Perte FROM vertiflow.incident_logs WHERE toString(severity) = 'critical' AND toString(status) IN ('open', 'in_progress') ORDER BY timestamp DESC", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [{ "matcher": { "id": "byName", "options": "Titre" }, "properties": [{ "id": "custom.width", "value": 280 }] }, { "matcher": { "id": "byName", "options": "Description" }, "properties": [{ "id": "custom.width", "value": 350 }] }] }
+    },
+    {
+      "type": "table",
+      "title": "Incidents WARNING Actifs",
+      "description": "Incidents warning a surveiller",
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 31 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT incident_id as ID, timestamp as Date, zone_id as Zone, sensor_id as Capteur, title as Titre, description as Description, toString(status) as Statut, assigned_to as Assigne FROM vertiflow.incident_logs WHERE toString(severity) = 'warning' AND toString(status) IN ('open', 'in_progress', 'scheduled') ORDER BY timestamp DESC", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } } }
+    },
+    {
+      "type": "row",
+      "title": "Historique Complet",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 },
+      "collapsed": false
+    },
+    {
+      "type": "table",
+      "title": "Journal Complet des Incidents",
+      "description": "Historique de tous les incidents",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 39 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT incident_id as ID, timestamp as Date, toString(severity) as Severite, type as Type, title as Titre, zone_id as Zone, rack_id as Rack, toString(status) as Statut, assigned_to as Assigne, resolution as Resolution FROM vertiflow.incident_logs ORDER BY timestamp DESC", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [{ "matcher": { "id": "byName", "options": "Titre" }, "properties": [{ "id": "custom.width", "value": 250 }] }, { "matcher": { "id": "byName", "options": "Resolution" }, "properties": [{ "id": "custom.width", "value": 300 }] }] }
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["logs", "incidents", "alertes"],
+  "templating": { "list": [] },
+  "time": { "from": "now-7d", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "10 - Logs d Incidents",
+  "uid": "vertiflow-incident-logs",
+  "version": 1,
+  "weekStart": ""
+}

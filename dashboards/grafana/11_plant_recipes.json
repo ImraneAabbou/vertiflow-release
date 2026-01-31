@@ -1,0 +1,228 @@
+{
+  "annotations": { "list": [] },
+  "description": "Dashboard des Recettes de Culture - Recettes Initiales et Optimales Cortex",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "type": "row",
+      "title": "Vue d Ensemble des Recettes",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Recettes Initiales",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.plant_recipes WHERE toString(type) = 'initial'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "purple", "mode": "fixed" } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Recettes Optimales",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.plant_recipes WHERE toString(type) = 'optimal'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "green", "mode": "fixed" } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "gauge",
+      "title": "Score Optimisation Moyen",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(optimization_score), 1) as score FROM vertiflow.plant_recipes WHERE toString(type) = 'optimal'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 70 }, { "color": "green", "value": 85 }] } } }
+    },
+    {
+      "type": "stat",
+      "title": "Types de Plantes",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count(DISTINCT plant_type) as types FROM vertiflow.plant_recipes", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "semi-dark-green", "mode": "fixed" } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "row",
+      "title": "Recettes Initiales - Base de Reference",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "collapsed": false
+    },
+    {
+      "type": "table",
+      "title": "Catalogue des Recettes Initiales",
+      "description": "Recettes de base avant optimisation par Cortex A11",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT recipe_id as ID, name as Nom, plant_type as Plante, growth_stage as Stade, temp_optimal as Temp_C, humidity_optimal as Humidite, co2_optimal as CO2_ppm, ph_optimal as pH, ec_optimal as EC_mS, dli_optimal as DLI_mol, nitrogen_optimal as N_ppm, phosphorus_optimal as P_ppm, potassium_optimal as K_ppm, status as Statut, version as Version FROM vertiflow.plant_recipes WHERE toString(type) = 'initial' ORDER BY plant_type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "center", "filterable": true } }, "overrides": [{ "matcher": { "id": "byName", "options": "Nom" }, "properties": [{ "id": "custom.width", "value": 280 }] }] }
+    },
+    {
+      "type": "row",
+      "title": "Recettes Optimales - Cortex A11",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "collapsed": false
+    },
+    {
+      "type": "table",
+      "title": "Catalogue des Recettes Optimales",
+      "description": "Recettes optimisees par le systeme Cortex A11",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 15 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT recipe_id as ID, name as Nom, plant_type as Plante, growth_stage as Stade, temp_optimal as Temp_C, humidity_optimal as Humidite, co2_optimal as CO2_ppm, ph_optimal as pH, ec_optimal as EC_mS, dli_optimal as DLI_mol, round(optimization_score, 1) as Score, optimized_by as Optimise_Par, status as Statut, version as Version FROM vertiflow.plant_recipes WHERE toString(type) = 'optimal' ORDER BY optimization_score DESC", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "center", "filterable": true } }, "overrides": [{ "matcher": { "id": "byName", "options": "Nom" }, "properties": [{ "id": "custom.width", "value": 300 }] }, { "matcher": { "id": "byName", "options": "Score" }, "properties": [{ "id": "custom.displayMode", "value": "gradient-gauge" }, { "id": "min", "value": 0 }, { "id": "max", "value": 100 }] }] }
+    },
+    {
+      "type": "row",
+      "title": "Comparaison Parametres - Initial vs Optimal",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "collapsed": false
+    },
+    {
+      "type": "barchart",
+      "title": "Temperature par Recette (C)",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(plant_type, ' (', toString(type), ')') as Recette, temp_optimal as Temperature FROM vertiflow.plant_recipes ORDER BY plant_type, type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "celsius", "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "barchart",
+      "title": "Humidite par Recette (%)",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(plant_type, ' (', toString(type), ')') as Recette, humidity_optimal as Humidite FROM vertiflow.plant_recipes ORDER BY plant_type, type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "barchart",
+      "title": "CO2 par Recette (ppm)",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(plant_type, ' (', toString(type), ')') as Recette, co2_optimal as CO2 FROM vertiflow.plant_recipes ORDER BY plant_type, type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "ppm", "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "barchart",
+      "title": "DLI par Recette (mol)",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 32 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(plant_type, ' (', toString(type), ')') as Recette, dli_optimal as DLI FROM vertiflow.plant_recipes ORDER BY plant_type, type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "barchart",
+      "title": "pH par Recette",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 32 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(plant_type, ' (', toString(type), ')') as Recette, ph_optimal as pH FROM vertiflow.plant_recipes ORDER BY plant_type, type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "barchart",
+      "title": "EC par Recette (mS/cm)",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 32 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(plant_type, ' (', toString(type), ')') as Recette, ec_optimal as EC FROM vertiflow.plant_recipes ORDER BY plant_type, type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "row",
+      "title": "Ameliorations Cortex A11",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 40 },
+      "collapsed": false
+    },
+    {
+      "type": "gauge",
+      "title": "Amelioration Rendement Moyenne",
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 41 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(yield_increase), 1) as rendement FROM vertiflow.plant_recipes WHERE toString(type) = 'optimal'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 30, "thresholds": { "steps": [{ "color": "yellow", "value": null }, { "color": "light-green", "value": 10 }, { "color": "green", "value": 15 }, { "color": "dark-green", "value": 20 }] } } },
+      "options": { "showThresholdLabels": true, "showThresholdMarkers": true }
+    },
+    {
+      "type": "gauge",
+      "title": "Amelioration Qualite Moyenne",
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 41 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(quality_increase), 1) as qualite FROM vertiflow.plant_recipes WHERE toString(type) = 'optimal'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 20, "thresholds": { "steps": [{ "color": "yellow", "value": null }, { "color": "light-green", "value": 5 }, { "color": "green", "value": 8 }, { "color": "dark-green", "value": 12 }] } } },
+      "options": { "showThresholdLabels": true, "showThresholdMarkers": true }
+    },
+    {
+      "type": "gauge",
+      "title": "Reduction Energie Moyenne",
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 41 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(energy_reduction), 1) as energie FROM vertiflow.plant_recipes WHERE toString(type) = 'optimal'", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 15, "thresholds": { "steps": [{ "color": "orange", "value": null }, { "color": "light-green", "value": 3 }, { "color": "green", "value": 5 }, { "color": "dark-green", "value": 8 }] } } },
+      "options": { "showThresholdLabels": true, "showThresholdMarkers": true }
+    },
+    {
+      "type": "table",
+      "title": "Details des Ameliorations par Plante",
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 48 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT recipe_id as ID, name as Nom, plant_type as Plante, round(optimization_score, 1) as Score_Optim, round(yield_increase, 1) as Rendement_Plus, round(quality_increase, 1) as Qualite_Plus, round(energy_reduction, 1) as Energie_Moins, optimized_by as Systeme, updated_at as Derniere_MAJ FROM vertiflow.plant_recipes WHERE toString(type) = 'optimal' ORDER BY optimization_score DESC", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "center" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Nom" }, "properties": [{ "id": "custom.width", "value": 300 }] }] }
+    },
+    {
+      "type": "row",
+      "title": "Nutriments N-P-K",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 55 },
+      "collapsed": false
+    },
+    {
+      "type": "barchart",
+      "title": "Azote (N) par Recette (ppm)",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 56 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(plant_type, ' (', toString(type), ')') as Recette, nitrogen_optimal as Azote FROM vertiflow.plant_recipes ORDER BY plant_type, type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "ppm", "color": { "fixedColor": "green", "mode": "fixed" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "barchart",
+      "title": "Phosphore (P) par Recette (ppm)",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 56 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(plant_type, ' (', toString(type), ')') as Recette, phosphorus_optimal as Phosphore FROM vertiflow.plant_recipes ORDER BY plant_type, type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "ppm", "color": { "fixedColor": "orange", "mode": "fixed" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    },
+    {
+      "type": "barchart",
+      "title": "Potassium (K) par Recette (ppm)",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 56 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(plant_type, ' (', toString(type), ')') as Recette, potassium_optimal as Potassium FROM vertiflow.plant_recipes ORDER BY plant_type, type", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "ppm", "color": { "fixedColor": "purple", "mode": "fixed" } } },
+      "options": { "orientation": "horizontal", "barWidth": 0.8, "showValue": "always" }
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 38,
+  "tags": ["recipes", "recettes", "cortex", "optimisation"],
+  "templating": { "list": [] },
+  "time": { "from": "now-30d", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "11 - Recettes de Culture",
+  "uid": "vertiflow-plant-recipes",
+  "version": 1,
+  "weekStart": ""
+}

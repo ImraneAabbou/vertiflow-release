@@ -1,717 +1,153 @@
-/*
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                 VERTIFLOW - OPERATIONAL COCKPIT DASHBOARD                    ║
-║                      Grafana Real-Time Monitoring                            ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ DOCUMENT METADATA                                                            │
-├──────────────────────────────────────────────────────────────────────────────┤
-│ Reference: TICKET-119                                                        │
-│ Date: January 3, 2026                                                        │
-│ Version: 1.0.0                                                               │
-│ Author/Team: @Imrane (DevOps & Monitoring Lead)                             │
-│ Classification: Technical - Internal                                         │
-│ Status: Production                                                           │
-│ Last Modified: 2026-01-03                                                    │
-│                                                                              │
-│ PURPOSE:                                                                     │
-│ This Grafana dashboard provides real-time monitoring of VertiFlow's         │
-│ operational metrics across all facilities. It integrates data from:         │
-│ - Prometheus (metrics)                                                       │
-│ - ClickHouse (historical aggregations)                                      │
-│ - Kafka (event streams)                                                      │
-│                                                                              │
-│ KEY PANELS:                                                                  │
-│ 1. Facility Status Overview - Current state of all growing facilities       │
-│ 2. Telemetry Real-Time - Temperature, humidity, CO2, light (5-min updates) │
-│ 3. Plant Growth Metrics - Daily biomass accumulation, height growth         │
-│ 4. Quality Assessment - Grade distribution, defect analysis                 │
-│ 5. Environmental Control - HVAC, irrigation, nutrient dosing                │
-│ 6. System Health - CPU, memory, disk, network metrics                       │
-│ 7. Alert Status - Active alerts, escalations, SLA compliance                │
-│ 8. Performance KPIs - Yield/m², quality %, revenue projections              │
-│                                                                              │
-│ DESIGN PRINCIPLES:                                                           │
-│ - Single page: All critical metrics visible without scrolling               │
-│ - Update frequency: 30 seconds (real-time operations focus)                │
-│ - Color coding: Green (optimal), Yellow (warning), Red (critical)           │
-│ - Multi-facility: Dropdown selector for facility-specific deep-dives        │
-│ - Mobile-responsive: Usable on tablets for facility floor monitoring        │
-│                                                                              │
-│ ASSIGNED TO: @Imrane (DevOps & Infrastructure Lead)                         │
-│ TEAM: @Imrane (monitoring), @Mouhammed (data), @Mounir (architecture)       │
-│ TICKET: TICKET-119                                                           │
-└──────────────────────────────────────────────────────────────────────────────┘
-*/
-
 {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": "-- Grafana --",
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
-  },
+  "annotations": {"list": []},
   "editable": true,
-  "gnetId": null,
+  "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": ["vertiflow", "monitoring"],
-      "targetBlank": true,
-      "title": "Science Lab Dashboard",
-      "tooltip": "Scientific analysis and optimization metrics",
-      "type": "dashboards",
-      "url": "/d/science-lab-dashboard"
-    },
-    {
-      "asDropdown": false,
-      "icon": "doc",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": ["vertiflow", "alerts"],
-      "targetBlank": true,
-      "title": "System Health Dashboard",
-      "tooltip": "Infrastructure and system monitoring",
-      "type": "dashboards",
-      "url": "/d/system-health-dashboard"
-    }
-  ],
+  "links": [],
+  "liveNow": false,
   "panels": [
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 1: FACILITY STATUS OVERVIEW (Top-left)                     ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Single-glance view of all facilities                    ║
-    ║ Data Source: ClickHouse.facility_status                          ║
-    ║ Update Interval: 1 minute                                        ║
-    ║ Visualization: Stat cards (4 per row)                            ║
-    ║                                                                   ║
-    ║ Shows:                                                            ║
-    ║ - Facility name                                                   ║
-    ║ - Active crops (count)                                           ║
-    ║ - Current average temperature                                     ║
-    ║ - Quality score (% premium + grade A)                            ║
-    ║ - System health (operational / total systems)                     ║
-    ║                                                                   ║
-    ║ Why: Operations team needs quick scan to identify problem areas  ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "ClickHouse",
-      "description": "Real-time status of all facilities at a glance",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 60
-              },
-              {
-                "color": "green",
-                "value": 85
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 0},
       "id": 1,
-      "options": {
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "values": false,
-          "fields": "",
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "format": "table",
-          "queryType": "randomWalk",
-          "refId": "A",
-          "datasource": "ClickHouse",
-          "rawSql": "SELECT \n  facility_id,\n  facility_name,\n  COUNT(DISTINCT plant_id) as active_plants,\n  ROUND(AVG(temperature_c), 1) as avg_temp_c,\n  ROUND(AVG(quality_score), 1) as quality_score,\n  ROUND(system_health_pct, 0) as system_health\nFROM telemetry.facility_summary\nWHERE measurement_date = today()\nGROUP BY facility_id, facility_name, system_health_pct\nORDER BY facility_name"
-        }
-      ],
-      "title": "🏭 FACILITY STATUS OVERVIEW",
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT count() FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "📊 Total Records",
       "type": "stat"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 2: TELEMETRY REAL-TIME (Top-right)                        ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Monitor environmental conditions in real-time            ║
-    ║ Data Source: Prometheus (MQTT → Kafka → Prometheus)             ║
-    ║ Update Interval: 30 seconds                                      ║
-    ║ Visualization: Time series with 4 metrics overlaid               ║
-    ║                                                                   ║
-    ║ Metrics:                                                          ║
-    ║ - Temperature (°C, target 22-25°C for basil) [RED line]          ║
-    ║ - Humidity (%, target 60-70%) [BLUE line]                        ║
-    ║ - CO2 (ppm, target 800-1000) [GREEN line]                        ║
-    ║ - Light intensity (µmol/m²/s, target 14-16) [YELLOW line]        ║
-    ║                                                                   ║
-    ║ Why: Real-time monitoring allows quick response to drift from    ║
-    ║      setpoints. Prevents crop stress and quality issues.         ║
-    ║      Threshold violations trigger alerts.                        ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "Prometheus",
-      "description": "Real-time environmental telemetry (30-sec updates)",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "max": null,
-          "min": null,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Temperature (°C)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "red"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Humidity (%)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "blue"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "CO2 (ppm)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Light (µmol/m²/s)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "yellow"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}, {"color": "green", "value": 20}, {"color": "yellow", "value": 28}, {"color": "red", "value": 35}]}, "unit": "celsius"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 0},
       "id": 2,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "max", "min"],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "avg(vertiflow_temperature_celsius{facility_id=~\"$facility\"})",
-          "legendFormat": "Temperature (°C)",
-          "refId": "A",
-          "datasource": "Prometheus"
-        },
-        {
-          "expr": "avg(vertiflow_humidity_percent{facility_id=~\"$facility\"})",
-          "legendFormat": "Humidity (%)",
-          "refId": "B",
-          "datasource": "Prometheus"
-        },
-        {
-          "expr": "avg(vertiflow_co2_ppm{facility_id=~\"$facility\"})",
-          "legendFormat": "CO2 (ppm)",
-          "refId": "C",
-          "datasource": "Prometheus"
-        },
-        {
-          "expr": "avg(vertiflow_light_intensity_umol_m2_s{facility_id=~\"$facility\"})",
-          "legendFormat": "Light (µmol/m²/s)",
-          "refId": "D",
-          "datasource": "Prometheus"
-        }
-      ],
-      "title": "📊 TELEMETRY REAL-TIME",
-      "type": "timeseries"
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(air_temp_internal), 1) FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "🌡️ Avg Temperature",
+      "type": "stat"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 3: PLANT GROWTH METRICS (Middle-left)                      ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Track daily growth rates across facility                 ║
-    ║ Data Source: ClickHouse.plant_growth_daily                       ║
-    ║ Update Interval: 1 hour (daily aggregations)                      ║
-    ║ Visualization: Bar chart (daily biomass gain)                     ║
-    ║                                                                   ║
-    ║ Shows:                                                            ║
-    ║ - Daily biomass accumulation per plant (g/day)                   ║
-    ║ - Color-coded by growth stage (seedling/veg/mature)             ║
-    ║ - Comparison vs crop-specific target                             ║
-    ║                                                                   ║
-    ║ Why: Operations need to ensure plants are growing at expected    ║
-    ║      rates. Slow growth indicates nutrient, light, or stress     ║
-    ║      issues requiring intervention.                              ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "ClickHouse",
-      "description": "Daily plant biomass growth rates",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "max": 5,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1.5
-              },
-              {
-                "color": "green",
-                "value": 2.5
-              }
-            ]
-          },
-          "unit": "g"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 50}, {"color": "green", "value": 60}, {"color": "yellow", "value": 80}, {"color": "red", "value": 90}]}, "unit": "percent"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
       "id": 3,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "values": false,
-          "fields": "",
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "format": "table",
-          "queryType": "randomWalk",
-          "refId": "A",
-          "datasource": "ClickHouse",
-          "rawSql": "SELECT\n  toDate(measurement_date) as date,\n  crop_type,\n  ROUND(AVG(daily_biomass_gain_g), 2) as avg_biomass_gain\nFROM telemetry.plant_growth_daily\nWHERE facility_id = '$facility' \n  AND measurement_date >= today() - 30\nGROUP BY date, crop_type\nORDER BY date DESC\nLIMIT 30"
-        }
-      ],
-      "title": "🌱 PLANT GROWTH METRICS",
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(air_humidity), 1) FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "💧 Avg Humidity",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 400}, {"color": "green", "value": 600}, {"color": "yellow", "value": 1200}, {"color": "red", "value": 1500}]}, "unit": "ppm"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 0},
+      "id": 4,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(co2_level_ambient), 0) FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "🌬️ Avg CO2",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 5.5}, {"color": "green", "value": 6}, {"color": "yellow", "value": 7}, {"color": "red", "value": 7.5}]}, "unit": "pH"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 0},
+      "id": 5,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(water_ph), 2) FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "⚗️ Avg pH",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 0},
+      "id": 6,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT count(DISTINCT zone_id) FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "🏢 Active Zones",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "Temperature (°C)", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "opacity", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "line"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 28}, {"color": "red", "value": 32}]}, "unit": "celsius"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "id": 7,
+      "options": {"legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 0, "rawSql": "SELECT toStartOfMinute(timestamp) as time, round(avg(air_temp_internal), 2) as air_temp, round(avg(water_temp), 2) as water_temp, round(avg(led_driver_temp), 2) as led_temp FROM vertiflow.basil_ultimate_realtime GROUP BY time ORDER BY time", "refId": "A"}],
+      "title": "🌡️ Temperature Trends",
       "type": "timeseries"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 4: QUALITY ASSESSMENT (Bottom-left)                        ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Track product quality grades in real-time                ║
-    ║ Data Source: ClickHouse.quality_assessment                       ║
-    ║ Update Interval: 2 hours (post-harvest assessment)               ║
-    ║ Visualization: Pie chart (grade distribution)                    ║
-    ║                                                                   ║
-    ║ Shows:                                                            ║
-    ║ - % PREMIUM (green) - Target: >30%                               ║
-    ║ - % GRADE_A (light green) - Target: >50%                         ║
-    ║ - % GRADE_B (yellow) - Target: <15%                              ║
-    ║ - % REJECT (red) - Target: <5%                                   ║
-    ║                                                                   ║
-    ║ Why: Quality directly impacts revenue. Allows QA to identify      ║
-    ║      systemic issues (lighting, nutrients, pests) affecting      ║
-    ║      yield or appearance.                                        ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "ClickHouse",
-      "description": "Product grade distribution (daily summary)",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            }
-          },
-          "mappings": [],
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "id": 4,
-      "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "right"
-        },
-        "pieType": "donut",
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "format": "table",
-          "queryType": "randomWalk",
-          "refId": "A",
-          "datasource": "ClickHouse",
-          "rawSql": "SELECT\n  quality_grade,\n  COUNT(*) * 100.0 / SUM(COUNT(*)) OVER() as percentage\nFROM telemetry.quality_assessment\nWHERE facility_id = '$facility'\n  AND assessment_date >= today() - 7\nGROUP BY quality_grade\nORDER BY quality_grade"
-        }
-      ],
-      "title": "⭐ QUALITY DISTRIBUTION (7-day)",
-      "type": "piechart"
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "Humidity (%)", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "opacity", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "line"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 50}, {"color": "green", "value": 60}, {"color": "yellow", "value": 80}, {"color": "red", "value": 90}]}, "unit": "percent"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "id": 8,
+      "options": {"legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 0, "rawSql": "SELECT toStartOfMinute(timestamp) as time, round(avg(air_humidity), 2) as air_humidity, round(avg(ext_humidity_nasa), 2) as ext_humidity FROM vertiflow.basil_ultimate_realtime GROUP BY time ORDER BY time", "refId": "A"}],
+      "title": "💧 Humidity Trends",
+      "type": "timeseries"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 5: ENVIRONMENTAL CONTROL (Bottom-right)                    ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Monitor active environmental control systems             ║
-    ║ Data Source: ClickHouse.environmental_commands                   ║
-    ║ Update Interval: 5 minutes                                       ║
-    ║ Visualization: Status indicators                                 ║
-    ║                                                                   ║
-    ║ Shows:                                                            ║
-    ║ - HVAC status (heating/cooling active)                           ║
-    ║ - Irrigation status (dosing ml/hour)                             ║
-    ║ - Nutrient dosing (nutrient solution concentration)              ║
-    ║ - Lights (on/off, intensity %)                                   ║
-    ║ - CO2 enrichment (ppm target, actual ppm)                        ║
-    ║                                                                   ║
-    ║ Why: Operations team needs to verify automated systems are       ║
-    ║      responding correctly to environmental setpoints. Manual     ║
-    ║      override capability in case of emergency.                   ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "ClickHouse",
-      "description": "Active environmental control commands",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "displayMode": "color-background",
-            "filterable": false
-          },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "OFF"
-                },
-                "1": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "ON"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "id": 5,
-      "options": {
-        "showHeader": true,
-        "sortBy": []
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "format": "table",
-          "queryType": "randomWalk",
-          "refId": "A",
-          "datasource": "ClickHouse",
-          "rawSql": "SELECT\n  command_type,\n  device_id,\n  CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END as active,\n  current_value,\n  target_value,\n  command_timestamp\nFROM telemetry.environmental_commands\nWHERE facility_id = '$facility'\n  AND command_timestamp >= now() - INTERVAL 5 MINUTE\nORDER BY command_timestamp DESC"
-        }
-      ],
-      "title": "🎛️ ENVIRONMENTAL CONTROL STATUS",
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "CO2 (ppm)", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "opacity", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "line"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "yellow", "value": null}, {"color": "green", "value": 600}, {"color": "yellow", "value": 1200}, {"color": "red", "value": 1500}]}, "unit": "ppm"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "id": 9,
+      "options": {"legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 0, "rawSql": "SELECT toStartOfMinute(timestamp) as time, round(avg(co2_level_ambient), 0) as co2_ppm FROM vertiflow.basil_ultimate_realtime GROUP BY time ORDER BY time", "refId": "A"}],
+      "title": "🌬️ CO2 Level Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "PPFD (µmol/m²/s)", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "opacity", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "µmol/m²/s"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "id": 10,
+      "options": {"legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 0, "rawSql": "SELECT toStartOfMinute(timestamp) as time, round(avg(light_intensity_ppfd), 2) as ppfd FROM vertiflow.basil_ultimate_realtime GROUP BY time ORDER BY time", "refId": "A"}],
+      "title": "💡 Light Intensity (PPFD)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "max": 8, "min": 5, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 5.5}, {"color": "green", "value": 6}, {"color": "yellow", "value": 7}, {"color": "red", "value": 7.5}]}, "unit": "pH"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 20},
+      "id": 11,
+      "options": {"orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "showThresholdLabels": false, "showThresholdMarkers": true},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(water_ph), 2) FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "⚗️ pH Level",
+      "type": "gauge"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "max": 3, "min": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.8}, {"color": "green", "value": 1.2}, {"color": "yellow", "value": 2.5}, {"color": "red", "value": 3}]}, "unit": "mS/cm"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 20},
+      "id": 12,
+      "options": {"orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "showThresholdLabels": false, "showThresholdMarkers": true},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(nutrient_solution_ec), 2) FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "⚡ EC Level",
+      "type": "gauge"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": [{"matcher": {"id": "byName", "options": "records"}, "properties": [{"id": "custom.cellOptions", "value": {"mode": "gradient", "type": "gauge"}}]}]},
+      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 20},
+      "id": 13,
+      "options": {"footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT zone_id, rack_id, count() as records, round(avg(air_temp_internal), 1) as temp, round(avg(air_humidity), 1) as humidity FROM vertiflow.basil_ultimate_realtime GROUP BY zone_id, rack_id ORDER BY records DESC LIMIT 20", "refId": "A"}],
+      "title": "📋 Zone/Rack Distribution",
       "type": "table"
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 35,
+  "schemaVersion": 38,
   "style": "dark",
-  "tags": ["vertiflow", "operational", "monitoring", "real-time"],
-  "templating": {
-    "list": [
-      {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "ClickHouse",
-        "definition": "SELECT DISTINCT facility_id FROM telemetry.facility_summary ORDER BY facility_id",
-        "description": null,
-        "error": null,
-        "hide": 0,
-        "includeAll": true,
-        "label": "Facility",
-        "multi": false,
-        "name": "facility",
-        "options": [],
-        "query": {
-          "query": "SELECT DISTINCT facility_id FROM telemetry.facility_summary ORDER BY facility_id",
-          "rawSql": "SELECT DISTINCT facility_id FROM telemetry.facility_summary ORDER BY facility_id"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query"
-      }
-    ]
-  },
-  "time": {
-    "from": "now-6h",
-    "to": "now"
-  },
-  "timepicker": {
-    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
-  },
-  "timezone": "UTC",
+  "tags": ["vertiflow", "operational", "realtime"],
+  "templating": {"list": []},
+  "time": {"from": "2026-01-18T08:00:00.000Z", "to": "2026-01-18T12:00:00.000Z"},
+  "timepicker": {},
+  "timezone": "browser",
   "title": "VertiFlow Operational Cockpit",
   "uid": "operational-cockpit",
-  "version": 1
+  "version": 1,
+  "weekStart": ""
 }
-
-/*
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                            IMPLEMENTATION NOTES                              ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║                                                                              ║
-║ INSTALLATION:                                                                ║
-│ 1. Save this file as: dashboards/grafana/01_operational_cockpit.json        ║
-║ 2. Import to Grafana: Home → Dashboards → Import → Paste JSON               ║
-║ 3. Select data sources:                                                      ║
-║    - Prometheus: For real-time metrics (30s resolution)                      ║
-║    - ClickHouse: For aggregated daily metrics (1h resolution)                ║
-║                                                                              ║
-║ DATA SOURCES REQUIRED:                                                       ║
-║ 1. Prometheus with VertiFlow metrics exporter                                ║
-║    └─ Metrics: vertiflow_temperature_celsius, vertiflow_humidity_percent,   ║
-║                vertiflow_co2_ppm, vertiflow_light_intensity_umol_m2_s       ║
-║                                                                              ║
-║ 2. ClickHouse with telemetry schema                                          ║
-║    └─ Tables: facility_status, plant_growth_daily, quality_assessment,      ║
-║               environmental_commands                                         ║
-║                                                                              ║
-║ REFRESH STRATEGY:                                                            ║
-║ - Overall dashboard: 30 seconds (real-time operations focus)                 ║
-║ - Telemetry panels: 30s (latest sensor values)                               ║
-║ - Quality/Growth: 1h (batch daily aggregations)                              ║
-║ - Alert status: 1m (event-driven updates)                                    ║
-║                                                                              ║
-║ ALERT RULES (RECOMMENDED):                                                   ║
-║ 1. Temperature Out of Range: Alert if >27°C or <18°C for 10min              ║
-║ 2. Quality Score <70%: Alert if daily quality drops                          ║
-║ 3. System Health <50%: Alert if multiple systems offline                     ║
-║ 4. Kafka Lag: Alert if consumer lag > 5min                                   ║
-║ 5. Database Connection: Alert if ClickHouse unreachable                      ║
-║                                                                              ║
-║ TROUBLESHOOTING:                                                             ║
-║ - No data: Check Prometheus scrape configuration                             ║
-║ - Gaps in telemetry: Verify Kafka topic replication                          ║
-║ - Slow queries: Adjust ClickHouse table partitioning                         ║
-║ - Missing panels: Verify data source connectivity                            ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
-DOCUMENT FOOTER:
-═════════════════════════════════════════════════════════════════════════════
-
-TICKET: TICKET-119
-ASSIGNED TO: @Imrane (DevOps & Monitoring Lead)
-TEAM: @Imrane (infrastructure/monitoring), @Mouhammed (data pipelines), 
-      @Mounir (architecture), @MrZakaria (project oversight)
-
-CONTACT FOR QUESTIONS:
-- @Imrane: Infrastructure, Prometheus, Grafana configuration
-- @Mouhammed: Data queries, ClickHouse schema, ETL pipelines
-- @Mounir: Dashboard design, KPI definitions
-
-PROJECT: VertiFlow Data Platform - Intelligent Vertical Farming
-STATUS: Production Release
-CLASSIFICATION: Technical - Internal
-REPOSITORY: J-Mounir/test-projet-agri (GitHub)
-
-LAST UPDATED: 2026-01-03
-NEXT REVIEW: 2026-02-03 (Monthly)
-
-═════════════════════════════════════════════════════════════════════════════
-*/

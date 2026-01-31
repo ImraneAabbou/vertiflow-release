@@ -1,0 +1,256 @@
+{
+  "annotations": { "list": [] },
+  "description": "Dashboard de santé des capteurs IoT, répartition géographique, racks et zones",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "type": "row",
+      "title": "📊 Vue d'ensemble IoT",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "📡 Total Capteurs",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count(DISTINCT sensor_id) FROM vertiflow.iot_sensors", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }] } } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    {
+      "type": "stat",
+      "title": "🟢 En Ligne",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count(DISTINCT sensor_id) FROM vertiflow.iot_sensors WHERE status = 'online'", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "green", "mode": "fixed" } } },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "type": "stat",
+      "title": "🟡 Warning",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count(DISTINCT sensor_id) FROM vertiflow.iot_sensors WHERE status = 'warning'", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "yellow", "mode": "fixed" } } },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "type": "stat",
+      "title": "🔴 Hors Ligne",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count(DISTINCT sensor_id) FROM vertiflow.iot_sensors WHERE status = 'offline'", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "red", "mode": "fixed" } } },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "type": "stat",
+      "title": "⚠️ Erreur",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count(DISTINCT sensor_id) FROM vertiflow.iot_sensors WHERE status = 'error'", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "dark-red", "mode": "fixed" } } },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "type": "stat",
+      "title": "🔧 Maintenance",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count(DISTINCT sensor_id) FROM vertiflow.iot_sensors WHERE status = 'maintenance'", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "orange", "mode": "fixed" } } },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "type": "gauge",
+      "title": "💚 Santé Globale IoT",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 5 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT avg(health_score) FROM vertiflow.iot_sensors WHERE status != 'offline'", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 50 }, { "color": "yellow", "value": 75 }, { "color": "green", "value": 90 }] } } }
+    },
+    {
+      "type": "gauge",
+      "title": "🔋 Batterie Moyenne",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 5 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT avg(battery_level) FROM vertiflow.iot_sensors WHERE battery_level > 0", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 30 }, { "color": "yellow", "value": 60 }, { "color": "green", "value": 80 }] } } }
+    },
+    {
+      "type": "piechart",
+      "title": "📊 Répartition par Statut",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 5 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT status, count() as count FROM vertiflow.iot_sensors GROUP BY status", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [{ "matcher": { "id": "byName", "options": "online" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "offline" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "warning" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "error" }, "properties": [{ "id": "color", "value": { "fixedColor": "dark-red", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "maintenance" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] }] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }, "pieType": "donut" }
+    },
+    {
+      "type": "piechart",
+      "title": "🔧 Répartition par Type",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 5 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT sensor_type, count() as count FROM vertiflow.iot_sensors GROUP BY sensor_type ORDER BY count DESC", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "values": ["value"] }, "pieType": "pie" }
+    },
+    {
+      "type": "row",
+      "title": "🗺️ Carte & Localisation des Capteurs",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 11 },
+      "collapsed": false
+    },
+    {
+      "type": "geomap",
+      "title": "🗺️ Carte des Capteurs IoT - VertiFlow Casablanca",
+      "description": "Localisation géographique de tous les capteurs",
+      "gridPos": { "h": 12, "w": 16, "x": 0, "y": 12 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT sensor_id as name, latitude, longitude, health_score as metric, status, zone_id, rack_id, sensor_type FROM vertiflow.iot_sensors", "refId": "A", "format": 1 }],
+      "options": {
+        "view": { "id": "coords", "lat": 33.574, "lon": -7.590, "zoom": 17 },
+        "basemap": { "type": "osm-standard", "name": "OpenStreetMap" },
+        "layers": [{
+          "type": "markers",
+          "name": "Capteurs IoT",
+          "config": {
+            "style": { "size": { "fixed": 10, "min": 5, "max": 20, "field": "metric" }, "color": { "field": "status", "fixed": "green" }, "symbol": { "fixed": "circle", "mode": "fixed" } }
+          },
+          "location": { "mode": "coords", "latitude": "latitude", "longitude": "longitude" },
+          "tooltip": true
+        }]
+      }
+    },
+    {
+      "type": "table",
+      "title": "📍 Coordonnées des Capteurs",
+      "gridPos": { "h": 12, "w": 8, "x": 16, "y": 12 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT sensor_id, zone_id as zone, rack_id as rack, round(latitude, 4) as lat, round(longitude, 4) as lon, status FROM vertiflow.iot_sensors ORDER BY zone_id, rack_id", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "displayMode": "auto" } }, "overrides": [{ "matcher": { "id": "byName", "options": "status" }, "properties": [{ "id": "custom.displayMode", "value": "color-background-solid" }, { "id": "mappings", "value": [{ "type": "value", "options": { "online": { "color": "green", "index": 0 }, "offline": { "color": "red", "index": 1 }, "warning": { "color": "yellow", "index": 2 }, "error": { "color": "dark-red", "index": 3 }, "maintenance": { "color": "orange", "index": 4 } } }] }] }] }
+    },
+    {
+      "type": "row",
+      "title": "🏢 Répartition par Zones",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 24 },
+      "collapsed": false
+    },
+    {
+      "type": "bargauge",
+      "title": "📊 Capteurs par Zone",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 25 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT zone_id as zone, count() as sensors FROM vertiflow.iot_sensors GROUP BY zone_id ORDER BY sensors DESC", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "palette-classic" }, "thresholds": { "steps": [{ "color": "green", "value": null }] } } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    },
+    {
+      "type": "bargauge",
+      "title": "💚 Santé Moyenne par Zone",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 25 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT zone_id as zone, round(avg(health_score), 1) as health FROM vertiflow.iot_sensors WHERE status != 'offline' GROUP BY zone_id ORDER BY health DESC", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 70 }, { "color": "green", "value": 90 }] } } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    },
+    {
+      "type": "table",
+      "title": "📋 Détails par Zone",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 31 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT zone_id as Zone, count() as Total, countIf(status = 'online') as Online, countIf(status = 'offline') as Offline, countIf(status = 'warning') as Warning, countIf(status = 'error') as Error, countIf(status = 'maintenance') as Maintenance, round(avg(health_score), 1) as Health_Avg, round(avg(battery_level), 1) as Battery_Avg FROM vertiflow.iot_sensors GROUP BY zone_id ORDER BY zone_id", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "center" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Online" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Offline" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Warning" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Error" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "color", "value": { "fixedColor": "dark-red", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Maintenance" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Health_Avg" }, "properties": [{ "id": "unit", "value": "percent" }] }, { "matcher": { "id": "byName", "options": "Battery_Avg" }, "properties": [{ "id": "unit", "value": "percent" }] }] }
+    },
+    {
+      "type": "row",
+      "title": "🗄️ Répartition par Racks",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 39 },
+      "collapsed": false
+    },
+    {
+      "type": "bargauge",
+      "title": "📊 Capteurs par Rack",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 40 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(zone_id, ' / ', rack_id) as rack, count() as sensors FROM vertiflow.iot_sensors GROUP BY zone_id, rack_id ORDER BY sensors DESC", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    },
+    {
+      "type": "bargauge",
+      "title": "💚 Santé par Rack",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 40 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT concat(zone_id, ' / ', rack_id) as rack, round(avg(health_score), 1) as health FROM vertiflow.iot_sensors WHERE status != 'offline' GROUP BY zone_id, rack_id ORDER BY health DESC", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 70 }, { "color": "green", "value": 90 }] } } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    },
+    {
+      "type": "table",
+      "title": "📋 Détails par Rack",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 46 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT zone_id as Zone, rack_id as Rack, count() as Total, countIf(status = 'online') as Online, countIf(status = 'offline') as Offline, countIf(status = 'warning') as Warning, countIf(status = 'error') as Error, round(avg(health_score), 1) as Health_Avg, round(avg(battery_level), 1) as Battery_Avg FROM vertiflow.iot_sensors GROUP BY zone_id, rack_id ORDER BY zone_id, rack_id", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "center" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Online" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Offline" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Warning" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Error" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "color", "value": { "fixedColor": "dark-red", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Health_Avg" }, "properties": [{ "id": "unit", "value": "percent" }] }, { "matcher": { "id": "byName", "options": "Battery_Avg" }, "properties": [{ "id": "unit", "value": "percent" }] }] }
+    },
+    {
+      "type": "row",
+      "title": "📡 Liste Détaillée des Capteurs",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 54 },
+      "collapsed": false
+    },
+    {
+      "type": "table",
+      "title": "📋 Tous les Capteurs IoT",
+      "description": "Liste complète avec santé, batterie et signal",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 55 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT sensor_id as ID, sensor_type as Type, zone_id as Zone, rack_id as Rack, module_id as Module, status as Status, round(health_score, 1) as Health, round(battery_level, 1) as Battery, signal_strength as Signal, firmware_version as Firmware, calibration_date as Calibration, errors_24h as Errors FROM vertiflow.iot_sensors ORDER BY zone_id, rack_id, sensor_id", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [{ "matcher": { "id": "byName", "options": "Status" }, "properties": [{ "id": "custom.displayMode", "value": "color-background-solid" }, { "id": "mappings", "value": [{ "type": "value", "options": { "online": { "color": "green", "index": 0, "text": "🟢 Online" }, "offline": { "color": "red", "index": 1, "text": "🔴 Offline" }, "warning": { "color": "yellow", "index": 2, "text": "🟡 Warning" }, "error": { "color": "dark-red", "index": 3, "text": "⛔ Error" }, "maintenance": { "color": "orange", "index": 4, "text": "🔧 Maintenance" } } }] }] }, { "matcher": { "id": "byName", "options": "Health" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "custom.displayMode", "value": "gradient-gauge" }, { "id": "thresholds", "value": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 70 }, { "color": "green", "value": 90 }] } }] }, { "matcher": { "id": "byName", "options": "Battery" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "custom.displayMode", "value": "gradient-gauge" }, { "id": "thresholds", "value": { "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 30 }, { "color": "green", "value": 60 }] } }] }, { "matcher": { "id": "byName", "options": "Signal" }, "properties": [{ "id": "unit", "value": "dBm" }, { "id": "thresholds", "value": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": -70 }, { "color": "green", "value": -50 }] } }] }, { "matcher": { "id": "byName", "options": "Errors" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "thresholds", "value": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 5 }, { "color": "red", "value": 10 }] } }] }] },
+      "options": { "showHeader": true, "footer": { "show": true, "reducer": ["count"], "countRows": true } }
+    },
+    {
+      "type": "row",
+      "title": "⚠️ Alertes & Capteurs Critiques",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 65 },
+      "collapsed": false
+    },
+    {
+      "type": "table",
+      "title": "🚨 Capteurs en Alerte",
+      "description": "Capteurs offline, en erreur ou avec batterie faible",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 66 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT sensor_id as ID, sensor_type as Type, zone_id as Zone, rack_id as Rack, status as Status, round(health_score, 1) as Health, round(battery_level, 1) as Battery, errors_24h as Errors FROM vertiflow.iot_sensors WHERE status IN ('offline', 'error', 'warning') OR battery_level < 30 OR errors_24h > 5 ORDER BY CASE status WHEN 'error' THEN 1 WHEN 'offline' THEN 2 WHEN 'warning' THEN 3 ELSE 4 END, errors_24h DESC", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Status" }, "properties": [{ "id": "custom.displayMode", "value": "color-background-solid" }, { "id": "mappings", "value": [{ "type": "value", "options": { "online": { "color": "green", "index": 0 }, "offline": { "color": "red", "index": 1 }, "warning": { "color": "yellow", "index": 2 }, "error": { "color": "dark-red", "index": 3 }, "maintenance": { "color": "orange", "index": 4 } } }] }] }, { "matcher": { "id": "byName", "options": "Health" }, "properties": [{ "id": "unit", "value": "percent" }] }, { "matcher": { "id": "byName", "options": "Battery" }, "properties": [{ "id": "unit", "value": "percent" }] }] }
+    },
+    {
+      "type": "table",
+      "title": "🔋 Batteries Faibles",
+      "description": "Capteurs nécessitant un remplacement de batterie",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 66 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT sensor_id as ID, sensor_type as Type, zone_id as Zone, rack_id as Rack, round(battery_level, 1) as Battery, status as Status FROM vertiflow.iot_sensors WHERE battery_level < 60 AND battery_level > 0 ORDER BY battery_level ASC", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Battery" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "custom.displayMode", "value": "gradient-gauge" }, { "id": "thresholds", "value": { "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 30 }, { "color": "yellow", "value": 50 }] } }] }] }
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["iot", "sensors", "health", "map", "zones", "racks"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "09 - IoT Health & Map Dashboard",
+  "uid": "vertiflow-iot-health",
+  "version": 1,
+  "weekStart": ""
+}

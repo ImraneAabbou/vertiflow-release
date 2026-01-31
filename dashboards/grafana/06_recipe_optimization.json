@@ -1,0 +1,983 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "gridPos": { "h": 2, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "code": { "language": "plaintext", "showLineNumbers": false },
+        "content": "# 🧬 VertiFlow Recipe Optimization Dashboard\n\n**Cortex A11** optimise les recettes de culture en analysant les performances passées. Ce dashboard compare les **valeurs cibles** (définies par les recettes) avec les **valeurs réelles** mesurées par les capteurs IoT.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.0.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 70 },
+              { "color": "yellow", "value": 85 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 2 },
+      "id": 2,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  100 - (\n    abs(avg(air_temp_internal) - avg(ref_temp_opt)) / avg(ref_temp_opt) * 100 +\n    abs(avg(air_humidity) - avg(ref_humidity_opt)) / avg(ref_humidity_opt) * 100 +\n    abs(avg(nutrient_n_total) - avg(ref_n_target)) / avg(ref_n_target) * 100 +\n    abs(avg(nutrient_p_phosphorus) - avg(ref_p_target)) / avg(ref_p_target) * 100 +\n    abs(avg(nutrient_k_potassium) - avg(ref_k_target)) / avg(ref_k_target) * 100\n  ) / 5 as recipe_compliance_score\nFROM vertiflow.basil_ultimate_realtime\nWHERE timestamp > now() - INTERVAL 1 HOUR",
+          "refId": "A"
+        }
+      ],
+      "title": "🎯 Score Conformité Recette",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 2 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT count(DISTINCT spectral_recipe_id) as active_recipes\nFROM vertiflow.basil_ultimate_realtime\nWHERE timestamp > now() - INTERVAL 24 HOUR",
+          "refId": "A"
+        }
+      ],
+      "title": "📋 Recettes Actives",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 2 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT count(DISTINCT growth_stage) as growth_stages\nFROM vertiflow.basil_ultimate_realtime\nWHERE timestamp > now() - INTERVAL 24 HOUR",
+          "refId": "A"
+        }
+      ],
+      "title": "🌱 Stades de Croissance",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "purple", "value": null }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 2 },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT round(avg(days_since_planting), 1) as avg_days\nFROM vertiflow.basil_ultimate_realtime\nWHERE timestamp > now() - INTERVAL 1 HOUR",
+          "refId": "A"
+        }
+      ],
+      "title": "📅 Jours Moyens Depuis Plantation",
+      "type": "stat"
+    },
+    {
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 8 },
+      "id": 6,
+      "options": { "code": { "language": "plaintext" }, "content": "", "mode": "markdown" },
+      "title": "🌡️ PARAMÈTRES CLIMATIQUES - Cible vs Réel",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Température (°C)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "line" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 24 }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "target_temp" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "actual_temp" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 9 },
+      "id": 7,
+      "options": {
+        "legend": { "calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfMinute(timestamp) as time,\n  avg(ref_temp_opt) as target_temp,\n  avg(air_temp_internal) as actual_temp\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "🌡️ Température: Cible (orange) vs Réel (vert)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Humidité (%)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "line" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 65 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "target_humidity" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "actual_humidity" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 9 },
+      "id": 8,
+      "options": {
+        "legend": { "calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfMinute(timestamp) as time,\n  avg(ref_humidity_opt) as target_humidity,\n  avg(air_humidity) as actual_humidity\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "💧 Humidité: Cible (orange) vs Réel (bleu)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
+      "id": 9,
+      "options": { "code": { "language": "plaintext" }, "content": "", "mode": "markdown" },
+      "title": "🧪 NUTRIMENTS N-P-K - Cible vs Réel",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "N (ppm)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "ppm"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "target_N" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "actual_N" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "dark-green", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 17 },
+      "id": 10,
+      "options": {
+        "legend": { "calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfMinute(timestamp) as time,\n  avg(ref_n_target) as target_N,\n  avg(nutrient_n_total) as actual_N\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "🟢 Azote (N): Cible vs Réel",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "P (ppm)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "ppm"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "target_P" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "actual_P" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 17 },
+      "id": 11,
+      "options": {
+        "legend": { "calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfMinute(timestamp) as time,\n  avg(ref_p_target) as target_P,\n  avg(nutrient_p_phosphorus) as actual_P\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "🟠 Phosphore (P): Cible vs Réel",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "K (ppm)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "ppm"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "target_K" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "actual_K" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "light-purple", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 17 },
+      "id": 12,
+      "options": {
+        "legend": { "calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfMinute(timestamp) as time,\n  avg(ref_k_target) as target_K,\n  avg(nutrient_k_potassium) as actual_K\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "🟣 Potassium (K): Cible vs Réel",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 24 },
+      "id": 13,
+      "options": { "code": { "language": "plaintext" }, "content": "", "mode": "markdown" },
+      "title": "🌿 INDICATEURS DE CROISSANCE - Cible vs Réel",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "LAI (m²/m²)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "target_LAI" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "dark-green", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "actual_LAI" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "light-green", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 25 },
+      "id": 14,
+      "options": {
+        "legend": { "calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfMinute(timestamp) as time,\n  avg(ref_lai_target) as target_LAI,\n  avg(leaf_area_index_lai) as actual_LAI\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "🍃 Leaf Area Index (LAI): Cible vs Réel",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Huile (%)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "target_oil" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "gold", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "actual_oil" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 25 },
+      "id": 15,
+      "options": {
+        "legend": { "calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfMinute(timestamp) as time,\n  avg(ref_oil_target) as target_oil,\n  avg(essential_oil_yield) as actual_oil\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "🫒 Essential Oil Yield: Cible vs Réel",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "WUE (g/L)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "target_WUE" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "actual_WUE" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "light-blue", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 25 },
+      "id": 16,
+      "options": {
+        "legend": { "calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfMinute(timestamp) as time,\n  avg(ref_wue_target) as target_WUE,\n  avg(wue_current) as actual_WUE\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "💧 Water Use Efficiency (WUE): Cible vs Réel",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
+      "id": 17,
+      "options": { "code": { "language": "plaintext" }, "content": "", "mode": "markdown" },
+      "title": "📊 TABLEAU DE BORD ÉCARTS (GAP ANALYSIS)",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "gap_pct" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } },
+              { "id": "max", "value": 20 },
+              { "id": "min", "value": 0 },
+              { "id": "unit", "value": "percent" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "status" },
+            "properties": [
+              { 
+                "id": "mappings", 
+                "value": [
+                  { "options": { "OK": { "color": "green", "index": 0, "text": "✅ OK" } }, "type": "value" },
+                  { "options": { "WARNING": { "color": "yellow", "index": 1, "text": "⚠️ WARNING" } }, "type": "value" },
+                  { "options": { "CRITICAL": { "color": "red", "index": 2, "text": "🔴 CRITICAL" } }, "type": "value" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 33 },
+      "id": 18,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "gap_pct" }]
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "WITH gaps AS (\n  SELECT\n    'Temperature' as parameter,\n    avg(ref_temp_opt) as target_value,\n    avg(air_temp_internal) as actual_value,\n    '°C' as unit\n  FROM vertiflow.basil_ultimate_realtime\n  WHERE timestamp > now() - INTERVAL 1 HOUR\n  UNION ALL\n  SELECT\n    'Humidity' as parameter,\n    avg(ref_humidity_opt) as target_value,\n    avg(air_humidity) as actual_value,\n    '%' as unit\n  FROM vertiflow.basil_ultimate_realtime\n  WHERE timestamp > now() - INTERVAL 1 HOUR\n  UNION ALL\n  SELECT\n    'Nitrogen (N)' as parameter,\n    avg(ref_n_target) as target_value,\n    avg(nutrient_n_total) as actual_value,\n    'ppm' as unit\n  FROM vertiflow.basil_ultimate_realtime\n  WHERE timestamp > now() - INTERVAL 1 HOUR\n  UNION ALL\n  SELECT\n    'Phosphorus (P)' as parameter,\n    avg(ref_p_target) as target_value,\n    avg(nutrient_p_phosphorus) as actual_value,\n    'ppm' as unit\n  FROM vertiflow.basil_ultimate_realtime\n  WHERE timestamp > now() - INTERVAL 1 HOUR\n  UNION ALL\n  SELECT\n    'Potassium (K)' as parameter,\n    avg(ref_k_target) as target_value,\n    avg(nutrient_k_potassium) as actual_value,\n    'ppm' as unit\n  FROM vertiflow.basil_ultimate_realtime\n  WHERE timestamp > now() - INTERVAL 1 HOUR\n  UNION ALL\n  SELECT\n    'Leaf Area Index' as parameter,\n    avg(ref_lai_target) as target_value,\n    avg(leaf_area_index_lai) as actual_value,\n    'm²/m²' as unit\n  FROM vertiflow.basil_ultimate_realtime\n  WHERE timestamp > now() - INTERVAL 1 HOUR\n  UNION ALL\n  SELECT\n    'Essential Oil' as parameter,\n    avg(ref_oil_target) as target_value,\n    avg(essential_oil_yield) as actual_value,\n    '%' as unit\n  FROM vertiflow.basil_ultimate_realtime\n  WHERE timestamp > now() - INTERVAL 1 HOUR\n  UNION ALL\n  SELECT\n    'Water Use Efficiency' as parameter,\n    avg(ref_wue_target) as target_value,\n    avg(wue_current) as actual_value,\n    'g/L' as unit\n  FROM vertiflow.basil_ultimate_realtime\n  WHERE timestamp > now() - INTERVAL 1 HOUR\n)\nSELECT\n  parameter,\n  round(target_value, 2) as target_value,\n  round(actual_value, 2) as actual_value,\n  unit,\n  round(abs(actual_value - target_value) / target_value * 100, 2) as gap_pct,\n  CASE\n    WHEN abs(actual_value - target_value) / target_value * 100 < 5 THEN 'OK'\n    WHEN abs(actual_value - target_value) / target_value * 100 < 10 THEN 'WARNING'\n    ELSE 'CRITICAL'\n  END as status\nFROM gaps\nORDER BY gap_pct DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "📋 Analyse des Écarts - Tous Paramètres",
+      "type": "table"
+    },
+    {
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 43 },
+      "id": 19,
+      "options": { "code": { "language": "plaintext" }, "content": "", "mode": "markdown" },
+      "title": "🏆 PERFORMANCE PAR RACK",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "compliance_score" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } },
+              { "id": "max", "value": 100 },
+              { "id": "min", "value": 0 },
+              { "id": "unit", "value": "percent" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red", "value": null },
+                    { "color": "orange", "value": 70 },
+                    { "color": "yellow", "value": 85 },
+                    { "color": "green", "value": 95 }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "health_score" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } },
+              { "id": "max", "value": 1 },
+              { "id": "min", "value": 0 },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red", "value": null },
+                    { "color": "orange", "value": 0.7 },
+                    { "color": "yellow", "value": 0.85 },
+                    { "color": "green", "value": 0.95 }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 44 },
+      "id": 20,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "compliance_score" }]
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT\n  rack_id,\n  zone_id,\n  count() as records,\n  round(avg(health_score), 3) as health_score,\n  round(avg(fresh_biomass_est), 1) as avg_biomass_g,\n  round(avg(essential_oil_yield), 2) as avg_oil_pct,\n  round(avg(chlorophyll_index_spad), 1) as avg_chlorophyll,\n  round(\n    100 - (\n      abs(avg(air_temp_internal) - avg(ref_temp_opt)) / avg(ref_temp_opt) * 100 +\n      abs(avg(air_humidity) - avg(ref_humidity_opt)) / avg(ref_humidity_opt) * 100 +\n      abs(avg(nutrient_n_total) - avg(ref_n_target)) / avg(ref_n_target) * 100 +\n      abs(avg(nutrient_p_phosphorus) - avg(ref_p_target)) / avg(ref_p_target) * 100 +\n      abs(avg(nutrient_k_potassium) - avg(ref_k_target)) / avg(ref_k_target) * 100\n    ) / 5\n  , 1) as compliance_score\nFROM vertiflow.basil_ultimate_realtime\nWHERE timestamp > now() - INTERVAL 1 HOUR\nGROUP BY rack_id, zone_id\nORDER BY compliance_score DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "🏆 Conformité Recette par Rack",
+      "type": "table"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["vertiflow", "recipes", "optimization", "cortex"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "06 - Recipe Optimization (Cortex A11)",
+  "uid": "vertiflow-recipes",
+  "version": 1,
+  "weekStart": ""
+}

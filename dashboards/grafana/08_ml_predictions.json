@@ -1,0 +1,702 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Dashboard des résultats des modèles Machine Learning VertiFlow",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "type": "row",
+      "title": "📊 Prédictions ML en Temps Réel",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "🔮 Prédictions des Modèles ML (Temps Réel)",
+      "description": "Prédictions enregistrées par ml_prediction_logger.py",
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT toStartOfMinute(timestamp) as time, model_name, avg(prediction_value) as value FROM vertiflow.ml_predictions WHERE timestamp >= now() - INTERVAL 24 HOUR GROUP BY time, model_name ORDER BY time",
+          "refId": "A",
+          "format": 0
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 20, "showPoints": "always" }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Oracle_A9" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Classifier_A10" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Cortex_A11" }, "properties": [{ "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } }] }
+        ]
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "last"] }
+      }
+    },
+    {
+      "type": "table",
+      "title": "📋 Dernières Prédictions ML",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT timestamp, model_name, batch_id, prediction_type, round(prediction_value, 2) as value, round(confidence * 100, 1) as confidence_pct, execution_time_ms as exec_ms FROM vertiflow.ml_predictions ORDER BY timestamp DESC LIMIT 15",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "auto" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "confidence_pct" }, "properties": [{ "id": "unit", "value": "percent" }] },
+          { "matcher": { "id": "byName", "options": "exec_ms" }, "properties": [{ "id": "unit", "value": "ms" }] }
+        ]
+      }
+    },
+    {
+      "type": "row",
+      "title": "🤖 Oracle A9 - Prédiction de Rendement",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Rendement Prédit Moyen (kg/m²)",
+      "description": "Prédiction du modèle Oracle RandomForest",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+          "rawSql": "SELECT avg(predicted_yield_kg_m2) as yield FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kg/m²",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 2 },
+              { "color": "green", "value": 3.5 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "type": "gauge",
+      "title": "Rendement Prédit Max",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT max(predicted_yield_kg_m2) FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kg/m²",
+          "min": 0,
+          "max": 6,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 2 },
+              { "color": "yellow", "value": 3 },
+              { "color": "green", "value": 4 }
+            ]
+          }
+        }
+      },
+      "options": { "orientation": "auto", "showThresholdLabels": false, "showThresholdMarkers": true }
+    },
+    {
+      "type": "timeseries",
+      "title": "📈 Évolution du Rendement Prédit (Oracle A9)",
+      "description": "Prédictions du modèle RandomForest par batch",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT toStartOfHour(timestamp) as time, avg(predicted_yield_kg_m2) as predicted_yield, batch_id FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 7 DAY GROUP BY time, batch_id ORDER BY time",
+          "refId": "A",
+          "format": 0
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kg/m²",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "color": { "mode": "palette-classic" }
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Prédictions Aujourd'hui",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 6 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT count() FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= today() AND predicted_yield_kg_m2 > 0",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Précision Estimée",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 6 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT 100 - (stddevPop(predicted_yield_kg_m2) / avg(predicted_yield_kg_m2) * 100) as precision FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR AND predicted_yield_kg_m2 > 0",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 70 },
+              { "color": "green", "value": 85 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "🎯 Classifier A10 - Classification Qualité",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 10 },
+      "collapsed": false
+    },
+    {
+      "type": "piechart",
+      "title": "Distribution des Classes de Qualité",
+      "description": "Répartition Premium / Standard / Rejet",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 11 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT quality_grade_prediction as quality, count() as count FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR GROUP BY quality_grade_prediction ORDER BY count DESC",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Premium" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Standard" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Rejet" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] },
+        "pieType": "donut",
+        "tooltip": { "mode": "single" },
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "🏆 Premium",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 11 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT countIf(quality_grade_prediction = 'Premium') * 100.0 / count() FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "color": { "fixedColor": "green", "mode": "fixed" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }] }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "type": "stat",
+      "title": "📦 Standard",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 11 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT countIf(quality_grade_prediction = 'Standard') * 100.0 / count() FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "color": { "fixedColor": "yellow", "mode": "fixed" }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "type": "stat",
+      "title": "⚠️ Rejet",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 11 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT countIf(quality_grade_prediction = 'Rejet') * 100.0 / count() FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "color": { "fixedColor": "red", "mode": "fixed" }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "type": "timeseries",
+      "title": "📊 Évolution de la Qualité dans le Temps",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 15 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT toStartOfHour(timestamp) as time, countIf(quality_grade_prediction = 'Premium') as Premium, countIf(quality_grade_prediction = 'Standard') as Standard, countIf(quality_grade_prediction = 'Rejet') as Rejet FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 7 DAY GROUP BY time ORDER BY time",
+          "refId": "A",
+          "format": 0
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 30, "stacking": { "mode": "normal" } }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Premium" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Standard" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Rejet" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] }
+      }
+    },
+    {
+      "type": "row",
+      "title": "🧠 Cortex A11 - Scores d'Anomalies & Santé",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "collapsed": false
+    },
+    {
+      "type": "gauge",
+      "title": "Score de Santé Moyen",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 24 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT avg(health_score) FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 50 },
+              { "color": "yellow", "value": 70 },
+              { "color": "green", "value": 85 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "gauge",
+      "title": "Confiance Anomalie",
+      "description": "Score de confiance de détection d'anomalies",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 24 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT avg(anomaly_confidence_score) * 100 FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 30 },
+              { "color": "orange", "value": 60 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "gauge",
+      "title": "Intégrité Module",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 24 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT avg(module_integrity_score) FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 70 },
+              { "color": "green", "value": 90 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Urgence Maintenance",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 24 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT avg(maintenance_urgency_score) FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 30 },
+              { "color": "red", "value": 60 }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background", "graphMode": "area" }
+    },
+    {
+      "type": "timeseries",
+      "title": "📈 Évolution des Scores ML",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 30 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT toStartOfHour(timestamp) as time, avg(health_score) as health_score, avg(anomaly_confidence_score) * 100 as anomaly_score, avg(module_integrity_score) as integrity_score, avg(predicted_yield_kg_m2) * 20 as yield_scaled FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 7 DAY GROUP BY time ORDER BY time",
+          "refId": "A",
+          "format": 0
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "health_score" }, "properties": [{ "id": "displayName", "value": "Santé" }, { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "anomaly_score" }, "properties": [{ "id": "displayName", "value": "Anomalie" }, { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "integrity_score" }, "properties": [{ "id": "displayName", "value": "Intégrité" }, { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "yield_scaled" }, "properties": [{ "id": "displayName", "value": "Rendement (x20)" }, { "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } }] }
+        ]
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "min", "max"] }
+      }
+    },
+    {
+      "type": "row",
+      "title": "🔮 Prédictions Énergétiques & Risques",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Besoin Énergétique 24h",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 39 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT avg(predicted_energy_need_24h) FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 1 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatth",
+          "decimals": 1,
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 200 }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "type": "stat",
+      "title": "Fiabilité Source",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 39 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT avg(source_reliability_score) * 100 FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 70 },
+              { "color": "green", "value": 90 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "table",
+      "title": "📋 Dernières Prédictions par Batch",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 39 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT batch_id, max(timestamp) as last_update, avg(predicted_yield_kg_m2) as yield_pred, any(quality_grade_prediction) as quality, avg(health_score) as health, avg(anomaly_confidence_score) as anomaly FROM vertiflow.basil_ultimate_realtime WHERE timestamp >= now() - INTERVAL 24 HOUR GROUP BY batch_id ORDER BY last_update DESC LIMIT 10",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "auto" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "yield_pred" }, "properties": [{ "id": "unit", "value": "kg/m²" }, { "id": "decimals", "value": 2 }] },
+          { "matcher": { "id": "byName", "options": "health" }, "properties": [{ "id": "unit", "value": "percent" }] },
+          { "matcher": { "id": "byName", "options": "anomaly" }, "properties": [{ "id": "unit", "value": "percentunit" }, { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }, { "id": "thresholds", "value": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0.5 }] } }] }
+        ]
+      },
+      "options": { "showHeader": true, "footer": { "show": false } }
+    },
+    {
+      "type": "row",
+      "title": "📊 Métriques des Modèles",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 47 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Oracle A9",
+      "description": "RandomForest Regressor - Yield Prediction",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 48 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT count() as predictions FROM vertiflow.ml_predictions WHERE model_name = 'Oracle_A9' AND timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    {
+      "type": "stat",
+      "title": "Classifier A10",
+      "description": "RandomForest Classifier - Quality Grade",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 48 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT count() as predictions FROM vertiflow.ml_predictions WHERE model_name = 'Classifier_A10' AND timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    {
+      "type": "stat",
+      "title": "Cortex A11",
+      "description": "Scipy Optimizer - Recipe Optimization",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 48 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT count() as predictions FROM vertiflow.ml_predictions WHERE model_name = 'Cortex_A11' AND timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    {
+      "type": "stat",
+      "title": "LSTM Harvest",
+      "description": "TensorFlow LSTM - Harvest Forecasting",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 48 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        {
+          "rawSql": "SELECT count() as predictions FROM vertiflow.ml_predictions WHERE model_name = 'LSTM_Harvest' AND timestamp >= now() - INTERVAL 24 HOUR",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "yellow", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    {
+      "type": "text",
+      "title": "📖 Légende des Modèles",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 48 },
+      "options": {
+        "mode": "markdown",
+        "content": "### Modèles ML VertiFlow\n\n| Modèle | Type | Usage |\n|--------|------|-------|\n| **Oracle A9** | RandomForest | Prédiction rendement |\n| **Classifier A10** | RandomForest | Classification qualité |\n| **Cortex A11** | Scipy L-BFGS-B | Optimisation recettes |\n| **LSTM Harvest** | TensorFlow | Prévision récolte |"
+      }
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["vertiflow", "ml", "ai", "predictions", "oracle", "classifier", "cortex"],
+  "templating": {
+    "list": [
+      {
+        "name": "batch_id",
+        "type": "query",
+        "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+        "query": "SELECT DISTINCT batch_id FROM vertiflow.basil_ultimate_realtime ORDER BY batch_id",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d"]
+  },
+  "timezone": "browser",
+  "title": "08 - ML Predictions Dashboard",
+  "uid": "vertiflow-ml-predictions",
+  "version": 1
+}

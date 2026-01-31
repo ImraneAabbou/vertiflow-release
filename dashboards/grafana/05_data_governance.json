@@ -1,0 +1,516 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": null,
+      "gridPos": { "h": 2, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "code": { "language": "plaintext", "showLineNumbers": false },
+        "content": "# 📊 VertiFlow Data Governance\n\n**Comparaison des données entre ClickHouse (Analytics) et MongoDB (Opérations)**",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.0.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50000 },
+              { "color": "red", "value": 100000 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 2 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT count() as total FROM vertiflow.basil_ultimate_realtime",
+          "refId": "A"
+        }
+      ],
+      "title": "🗄️ ClickHouse Records",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          },
+          "unit": "dateTimeAsIso"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 2 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT max(timestamp) as last_record FROM vertiflow.basil_ultimate_realtime",
+          "refId": "A"
+        }
+      ],
+      "title": "⏱️ Last ClickHouse Record",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 2 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT uniq(zone_id) as zones FROM vertiflow.basil_ultimate_realtime",
+          "refId": "A"
+        }
+      ],
+      "title": "🏢 Zones Actives",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "purple", "value": null }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 2 },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT uniq(rack_id) as racks FROM vertiflow.basil_ultimate_realtime",
+          "refId": "A"
+        }
+      ],
+      "title": "🏗️ Racks Monitorés",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+      "id": 6,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfHour(timestamp) as time,\n  count() as ingestion_count\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "📈 Ingestion Rate (Records/Hour)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 7 },
+      "id": 7,
+      "options": {
+        "displayLabels": ["name", "value"],
+        "legend": { "displayMode": "list", "placement": "right", "showLegend": true },
+        "pieType": "pie",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  zone_id,\n  count() as records\nFROM vertiflow.basil_ultimate_realtime\nGROUP BY zone_id",
+          "refId": "A"
+        }
+      ],
+      "title": "🏢 Distribution par Zone",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 7 },
+      "id": 8,
+      "options": {
+        "displayLabels": ["name", "value"],
+        "legend": { "displayMode": "list", "placement": "right", "showLegend": true },
+        "pieType": "pie",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  growth_stage,\n  count() as records\nFROM vertiflow.basil_ultimate_realtime\nGROUP BY growth_stage",
+          "refId": "A"
+        }
+      ],
+      "title": "🌱 Distribution par Stade de Croissance",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "records" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "id": 9,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  rack_id,\n  zone_id,\n  count() as records,\n  round(avg(health_score), 2) as avg_health,\n  round(avg(air_temp_internal), 1) as avg_temp,\n  round(avg(air_humidity), 1) as avg_humidity\nFROM vertiflow.basil_ultimate_realtime\nGROUP BY rack_id, zone_id\nORDER BY records DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "📊 Statistiques par Rack",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "id": 10,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 1,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  data_source_type,\n  count() as records,\n  round(avg(source_reliability_score), 3) as avg_reliability,\n  round(avg(data_integrity_flag), 4) as integrity_issues_pct\nFROM vertiflow.basil_ultimate_realtime\nGROUP BY data_source_type",
+          "refId": "A"
+        }
+      ],
+      "title": "🔍 Qualité des Données par Source",
+      "type": "table"
+    },
+    {
+      "datasource": null,
+      "gridPos": { "h": 2, "w": 24, "x": 0, "y": 23 },
+      "id": 11,
+      "options": {
+        "code": { "language": "plaintext", "showLineNumbers": false },
+        "content": "## 🗃️ MongoDB vs ClickHouse\n\n**Note**: MongoDB stocke les données opérationnelles (incident_logs: ~110K docs). ClickHouse stocke les données analytiques (basil_ultimate_realtime: ~70K records). Les données MongoDB incluent l'historique complet tandis que ClickHouse peut avoir une rétention différente.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.0.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 25 },
+      "id": 12,
+      "options": {
+        "legend": { "calcs": ["mean", "max", "last"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"
+          },
+          "format": 2,
+          "queryType": "sql",
+          "rawSql": "SELECT \n  toStartOfMinute(timestamp) as time,\n  rack_id,\n  avg(health_score) * 100 as health_pct\nFROM vertiflow.basil_ultimate_realtime\nWHERE $__timeFilter(timestamp)\nGROUP BY time, rack_id\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "💚 Health Score par Rack (Temps Réel)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["vertiflow", "governance", "data-quality"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "05 - Data Governance",
+  "uid": "vertiflow-governance",
+  "version": 1,
+  "weekStart": ""
+}

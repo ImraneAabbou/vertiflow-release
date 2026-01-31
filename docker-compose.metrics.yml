@@ -29,7 +29,6 @@
 # Initiative Nationale Marocaine JobInTech - YNOV Maroc Campus
 # ============================================================================
 
-version: '3.8'
 
 services:
   # Prometheus - Metrics collection
@@ -63,7 +62,9 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./dashboards/grafana:/etc/grafana/provisioning/dashboards
+      - ./dashboards/grafana:/dashboards
+      - ./dashboards/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./dashboards/provisioning/datasources:/etc/grafana/provisioning/datasources
     networks:
       - vertiflow-network
     restart: unless-stopped
@@ -91,6 +92,7 @@ services:
 networks:
   vertiflow-network:
     external: true
+    name: vertiflow_cloud_release_vertiflow-network
     # NOTE: J'ai retiré le 'name' spécifique pour éviter les erreurs si le dossier change de nom sur le Cloud.
 
 volumes:

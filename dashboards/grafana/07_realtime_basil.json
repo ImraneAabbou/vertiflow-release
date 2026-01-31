@@ -1,0 +1,180 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"},
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT count() as total FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "📊 Total Enregistrements",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}, {"color": "green", "value": 20}, {"color": "yellow", "value": 28}, {"color": "red", "value": 35}]}, "unit": "celsius"},
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "id": 2,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(air_temp_internal), 2) as avg_temp FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "🌡️ Température Moyenne",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 50}, {"color": "green", "value": 60}, {"color": "red", "value": 90}]}, "unit": "percent"},
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "id": 3,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(air_humidity), 2) as avg_humidity FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "💧 Humidité Moyenne",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"},
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "id": 4,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT count(DISTINCT zone_id) as zones FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "🏢 Zones Actives",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "auto", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "celsius"},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "id": 5,
+      "options": {"legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 0, "rawSql": "SELECT toStartOfMinute(timestamp) as time, round(avg(air_temp_internal), 2) as air_temp, round(avg(water_temp), 2) as water_temp FROM vertiflow.basil_ultimate_realtime GROUP BY time ORDER BY time", "refId": "A"}],
+      "title": "🌡️ Évolution des Températures",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "auto", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "percent"},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "id": 6,
+      "options": {"legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 0, "rawSql": "SELECT toStartOfMinute(timestamp) as time, round(avg(air_humidity), 2) as humidity FROM vertiflow.basil_ultimate_realtime GROUP BY time ORDER BY time", "refId": "A"}],
+      "title": "💧 Évolution de l'Humidité",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "auto", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "ppm"},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "id": 7,
+      "options": {"legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 0, "rawSql": "SELECT toStartOfMinute(timestamp) as time, round(avg(co2_level_ambient), 0) as co2 FROM vertiflow.basil_ultimate_realtime GROUP BY time ORDER BY time", "refId": "A"}],
+      "title": "🌬️ Niveau de CO2",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "auto", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "µmol/m²/s"},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "id": 8,
+      "options": {"legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 0, "rawSql": "SELECT toStartOfMinute(timestamp) as time, round(avg(light_intensity_ppfd), 2) as ppfd FROM vertiflow.basil_ultimate_realtime GROUP BY time ORDER BY time", "refId": "A"}],
+      "title": "💡 Lumière (PPFD)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "max": 8, "min": 5, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 5.5}, {"color": "green", "value": 6}, {"color": "yellow", "value": 7}, {"color": "red", "value": 7.5}]}, "unit": "pH"},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 20},
+      "id": 9,
+      "options": {"orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "showThresholdLabels": false, "showThresholdMarkers": true},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(water_ph), 2) as ph FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "⚗️ pH Moyen",
+      "type": "gauge"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "max": 3, "min": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.8}, {"color": "green", "value": 1.2}, {"color": "yellow", "value": 2.5}, {"color": "red", "value": 3}]}, "unit": "mS/cm"},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 20},
+      "id": 10,
+      "options": {"orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "showThresholdLabels": false, "showThresholdMarkers": true},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT round(avg(nutrient_solution_ec), 2) as ec FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "⚡ EC Moyenne",
+      "type": "gauge"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "avg_temp"}, "properties": [{"id": "unit", "value": "celsius"}]},
+          {"matcher": {"id": "byName", "options": "avg_humidity"}, "properties": [{"id": "unit", "value": "percent"}]}
+        ]
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 20},
+      "id": 11,
+      "options": {"footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT zone_id, count() as records, round(avg(air_temp_internal), 1) as avg_temp, round(avg(air_humidity), 1) as avg_humidity, round(avg(water_ph), 2) as avg_ph FROM vertiflow.basil_ultimate_realtime GROUP BY zone_id ORDER BY zone_id", "refId": "A"}],
+      "title": "📋 Résumé par Zone",
+      "type": "table"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["vertiflow", "basil", "realtime"],
+  "templating": {"list": []},
+  "time": {"from": "2026-01-18T08:00:00.000Z", "to": "2026-01-18T12:00:00.000Z"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "🌿 VertiFlow Basil Realtime",
+  "uid": "basil-realtime",
+  "version": 2,
+  "weekStart": ""
+}

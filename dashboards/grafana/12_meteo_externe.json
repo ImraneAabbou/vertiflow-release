@@ -1,0 +1,278 @@
+{
+  "annotations": { "list": [] },
+  "description": "Dashboard Meteorologique - Donnees Externes NASA et Open-Meteo",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "type": "row",
+      "title": "Localisation et Conditions Actuelles",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "type": "geomap",
+      "title": "Localisation Ferme VertiFlow - Casablanca",
+      "gridPos": { "h": 10, "w": 10, "x": 0, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT 33.5731 as latitude, -7.5898 as longitude, 'VertiFlow Farm Casablanca' as name, avg(ext_temp_nasa) as temperature, avg(ext_humidity_nasa) as humidity FROM vertiflow.basil_ultimate_realtime WHERE ext_temp_nasa > 0", "refId": "A", "format": 2 }],
+      "options": {
+        "view": { "id": "coords", "lat": 33.57, "lon": -7.59, "zoom": 10 },
+        "basemap": { "type": "osm-standard", "name": "OpenStreetMap" },
+        "layers": [{
+          "type": "markers",
+          "name": "Ferme",
+          "config": {
+            "showLegend": true,
+            "style": { "size": { "fixed": 15 }, "color": { "fixed": "green" }, "symbol": { "fixed": "img/icons/marker/circle.svg" } }
+          }
+        }],
+        "tooltip": { "mode": "details" }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Temperature Externe (NASA)",
+      "gridPos": { "h": 5, "w": 3, "x": 10, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(ext_temp_nasa), 1) as temperature FROM vertiflow.basil_ultimate_realtime WHERE ext_temp_nasa > 0 AND timestamp > now() - INTERVAL 6 HOUR", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "celsius", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 15 }, { "color": "yellow", "value": 25 }, { "color": "orange", "value": 30 }, { "color": "red", "value": 35 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Humidite Externe (NASA)",
+      "gridPos": { "h": 5, "w": 3, "x": 13, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(ext_humidity_nasa), 1) as humidite FROM vertiflow.basil_ultimate_realtime WHERE ext_humidity_nasa > 0 AND timestamp > now() - INTERVAL 6 HOUR", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 30 }, { "color": "green", "value": 50 }, { "color": "blue", "value": 80 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Radiation Solaire",
+      "gridPos": { "h": 5, "w": 3, "x": 16, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(ext_solar_radiation), 0) as radiation FROM vertiflow.basil_ultimate_realtime WHERE ext_solar_radiation > 0 AND timestamp > now() - INTERVAL 6 HOUR", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "watt", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "dark-blue", "value": null }, { "color": "blue", "value": 200 }, { "color": "yellow", "value": 400 }, { "color": "orange", "value": 600 }, { "color": "red", "value": 800 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Pression Atm.",
+      "gridPos": { "h": 5, "w": 3, "x": 19, "y": 1 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(air_pressure), 0) as pression FROM vertiflow.basil_ultimate_realtime WHERE air_pressure > 0 AND timestamp > now() - INTERVAL 6 HOUR", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "pressurehpa", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 1000 }, { "color": "yellow", "value": 1020 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "gauge",
+      "title": "Deficit Pression Vapeur (VPD)",
+      "gridPos": { "h": 5, "w": 4, "x": 10, "y": 6 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(vapor_pressure_deficit), 2) as vpd FROM vertiflow.basil_ultimate_realtime WHERE vapor_pressure_deficit > 0 AND timestamp > now() - INTERVAL 6 HOUR", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "pressurekpa", "min": 0, "max": 3, "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 0.8 }, { "color": "yellow", "value": 1.2 }, { "color": "red", "value": 1.8 }] } } },
+      "options": { "showThresholdLabels": true, "showThresholdMarkers": true }
+    },
+    {
+      "type": "stat",
+      "title": "Temp Interne Serre",
+      "gridPos": { "h": 5, "w": 3, "x": 14, "y": 6 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(air_temp_internal), 1) as temp FROM vertiflow.basil_ultimate_realtime WHERE air_temp_internal > 0 AND timestamp > now() - INTERVAL 6 HOUR", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "celsius", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 20 }, { "color": "yellow", "value": 28 }, { "color": "red", "value": 32 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Humidite Interne",
+      "gridPos": { "h": 5, "w": 3, "x": 17, "y": 6 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(air_humidity), 1) as humid FROM vertiflow.basil_ultimate_realtime WHERE air_humidity > 0 AND timestamp > now() - INTERVAL 6 HOUR", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 50 }, { "color": "green", "value": 60 }, { "color": "blue", "value": 80 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Delta Temp Feuille",
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 6 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(avg(leaf_temp_delta), 2) as delta FROM vertiflow.basil_ultimate_realtime WHERE timestamp > now() - INTERVAL 6 HOUR", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "celsius", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": -2 }, { "color": "yellow", "value": 0 }, { "color": "red", "value": 2 }] } } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "row",
+      "title": "Comparaison Externe vs Interne",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 11 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Temperature: Externe NASA vs Interne Serre",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        { "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(ext_temp_nasa), 1) as Temp_Externe_NASA FROM vertiflow.basil_ultimate_realtime WHERE ext_temp_nasa > 0 AND timestamp > now() - INTERVAL 7 DAY GROUP BY time ORDER BY time", "refId": "A", "format": 1 },
+        { "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(air_temp_internal), 1) as Temp_Interne_Serre FROM vertiflow.basil_ultimate_realtime WHERE air_temp_internal > 0 AND timestamp > now() - INTERVAL 7 DAY GROUP BY time ORDER BY time", "refId": "B", "format": 1 }
+      ],
+      "fieldConfig": { "defaults": { "unit": "celsius", "custom": { "lineWidth": 2, "fillOpacity": 10 } }, "overrides": [{ "matcher": { "id": "byName", "options": "Temp_Externe_NASA" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Temp_Interne_Serre" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "min", "max"] } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Humidite: Externe NASA vs Interne Serre",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        { "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(ext_humidity_nasa), 1) as Humidite_Externe_NASA FROM vertiflow.basil_ultimate_realtime WHERE ext_humidity_nasa > 0 AND timestamp > now() - INTERVAL 7 DAY GROUP BY time ORDER BY time", "refId": "A", "format": 1 },
+        { "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(air_humidity), 1) as Humidite_Interne_Serre FROM vertiflow.basil_ultimate_realtime WHERE air_humidity > 0 AND timestamp > now() - INTERVAL 7 DAY GROUP BY time ORDER BY time", "refId": "B", "format": 1 }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "custom": { "lineWidth": 2, "fillOpacity": 10 } }, "overrides": [{ "matcher": { "id": "byName", "options": "Humidite_Externe_NASA" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Humidite_Interne_Serre" }, "properties": [{ "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } }] }] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "min", "max"] } }
+    },
+    {
+      "type": "row",
+      "title": "Radiation Solaire et Energie",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Radiation Solaire (W/m2) - Evolution Journaliere",
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 21 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(ext_solar_radiation), 0) as Radiation_Solaire FROM vertiflow.basil_ultimate_realtime WHERE ext_solar_radiation > 0 AND timestamp > now() - INTERVAL 7 DAY GROUP BY time ORDER BY time", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "watt", "custom": { "lineWidth": 2, "fillOpacity": 30, "gradientMode": "scheme" }, "color": { "mode": "continuous-YlOrRd" } } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] } }
+    },
+    {
+      "type": "bargauge",
+      "title": "Radiation par Periode",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 21 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT CASE WHEN toHour(timestamp) BETWEEN 6 AND 9 THEN 'Matin (6h-9h)' WHEN toHour(timestamp) BETWEEN 10 AND 14 THEN 'Midi (10h-14h)' WHEN toHour(timestamp) BETWEEN 15 AND 18 THEN 'Apres-midi (15h-18h)' ELSE 'Nuit' END as periode, round(avg(ext_solar_radiation), 0) as radiation FROM vertiflow.basil_ultimate_realtime WHERE ext_solar_radiation > 0 GROUP BY periode ORDER BY radiation DESC", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "watt", "color": { "mode": "continuous-YlOrRd" }, "min": 0, "max": 800 } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    },
+    {
+      "type": "row",
+      "title": "Conditions Climatiques Internes",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 29 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "VPD (Deficit Pression Vapeur) - Indicateur Stress Plantes",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 30 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(vapor_pressure_deficit), 2) as VPD FROM vertiflow.basil_ultimate_realtime WHERE vapor_pressure_deficit > 0 AND timestamp > now() - INTERVAL 7 DAY GROUP BY time ORDER BY time", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "pressurekpa", "custom": { "lineWidth": 2, "fillOpacity": 20 }, "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 0.8 }, { "color": "yellow", "value": 1.2 }, { "color": "red", "value": 1.8 }] } } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "min", "max"] } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Pression Atmospherique",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 30 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(air_pressure), 0) as Pression FROM vertiflow.basil_ultimate_realtime WHERE air_pressure > 0 AND timestamp > now() - INTERVAL 7 DAY GROUP BY time ORDER BY time", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "pressurehpa", "custom": { "lineWidth": 2, "fillOpacity": 10 }, "color": { "fixedColor": "purple", "mode": "fixed" } } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "min", "max"] } }
+    },
+    {
+      "type": "row",
+      "title": "Statistiques Sources de Donnees",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Total Mesures",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 38 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.basil_ultimate_realtime", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "green", "mode": "fixed" } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Donnees NASA",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 38 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT count() as total FROM vertiflow.basil_ultimate_realtime WHERE ext_temp_nasa > 0", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "blue", "mode": "fixed" } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Couverture NASA",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 38 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT round(countIf(ext_temp_nasa > 0) * 100.0 / count(), 1) as pourcent FROM vertiflow.basil_ultimate_realtime", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "percent", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 50 }, { "color": "green", "value": 80 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Derniere Mise a Jour",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 38 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT max(timestamp) as dernier FROM vertiflow.basil_ultimate_realtime WHERE ext_temp_nasa > 0", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "unit": "dateTimeAsLocal" } },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value" }
+    },
+    {
+      "type": "table",
+      "title": "Statistiques Detaillees par Zone",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 38 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT zone_id as Zone, count() as Mesures, round(avg(air_temp_internal), 1) as Temp_Moy, round(avg(air_humidity), 1) as Humid_Moy, round(avg(vapor_pressure_deficit), 2) as VPD_Moy FROM vertiflow.basil_ultimate_realtime WHERE timestamp > now() - INTERVAL 1 DAY GROUP BY zone_id ORDER BY zone_id", "refId": "A", "format": 2 }],
+      "fieldConfig": { "defaults": { "custom": { "align": "center" } } }
+    },
+    {
+      "type": "row",
+      "title": "Analyse Correlation Meteo-Production",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 44 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Impact Radiation Solaire sur PPFD LED",
+      "description": "Correlation entre radiation externe et eclairage LED interne",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 45 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [
+        { "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(ext_solar_radiation), 0) as Radiation_Ext FROM vertiflow.basil_ultimate_realtime WHERE ext_solar_radiation > 0 AND timestamp > now() - INTERVAL 3 DAY GROUP BY time ORDER BY time", "refId": "A", "format": 1 },
+        { "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(light_intensity_ppfd), 0) as PPFD_LED FROM vertiflow.basil_ultimate_realtime WHERE light_intensity_ppfd > 0 AND timestamp > now() - INTERVAL 3 DAY GROUP BY time ORDER BY time", "refId": "B", "format": 1 }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2 } }, "overrides": [{ "matcher": { "id": "byName", "options": "Radiation_Ext" }, "properties": [{ "id": "unit", "value": "watt" }, { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "PPFD_LED" }, "properties": [{ "id": "unit", "value": "short" }, { "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } }] }] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Ecart Temperature Externe-Interne",
+      "description": "Efficacite de l isolation thermique",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 45 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00" },
+      "targets": [{ "rawSql": "SELECT toStartOfHour(timestamp) as time, round(avg(air_temp_internal) - avg(ext_temp_nasa), 1) as Delta_Temp FROM vertiflow.basil_ultimate_realtime WHERE ext_temp_nasa > 0 AND air_temp_internal > 0 AND timestamp > now() - INTERVAL 7 DAY GROUP BY time ORDER BY time", "refId": "A", "format": 1 }],
+      "fieldConfig": { "defaults": { "unit": "celsius", "custom": { "lineWidth": 2, "fillOpacity": 30 }, "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 0 }, { "color": "yellow", "value": 5 }, { "color": "red", "value": 10 }] } } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "min", "max"] } }
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 38,
+  "tags": ["meteo", "nasa", "externe", "climat"],
+  "templating": { "list": [] },
+  "time": { "from": "now-7d", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "12 - Meteo et Donnees Externes",
+  "uid": "vertiflow-meteo-externe",
+  "version": 1,
+  "weekStart": ""
+}

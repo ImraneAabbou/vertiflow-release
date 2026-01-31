@@ -1,0 +1,20 @@
+apiVersion: 1
+
+datasources:
+  - name: ClickHouse
+    type: grafana-clickhouse-datasource
+    access: proxy
+    url: http://clickhouse:8123
+    database: vertiflow
+    # user: default
+    # password: default
+    uid: aeb1b4ee-1f88-42c3-a35a-f594cac90e00
+    isDefault: true
+    editable: true
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    uid: eac5c342-46aa-46b8-934f-8e09892a5192
+    isDefault: false

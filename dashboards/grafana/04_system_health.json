@@ -1,1352 +1,240 @@
-/*
-╔══════════════════════════════════════════════════════════════════════════════╗
-║               VERTIFLOW - SYSTEM HEALTH & INFRASTRUCTURE DASHBOARD            ║
-║          Real-time Monitoring: Compute, Storage, Services, Alerts             ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ DOCUMENT METADATA                                                            │
-├──────────────────────────────────────────────────────────────────────────────┤
-│ Reference: TICKET-122                                                        │
-│ Date: January 3, 2026                                                        │
-│ Version: 1.0.0                                                               │
-│ Author/Team: @Imrane (DevOps Lead), @Mouhammed (Platform Engineer)          │
-│ Classification: Technical - Internal                                         │
-│ Status: Production                                                           │
-│ Last Modified: 2026-01-03                                                    │
-│                                                                              │
-│ PURPOSE:                                                                     │
-│ This dashboard provides comprehensive infrastructure health monitoring       │
-│ for operations and DevOps teams. It enables:                                │
-│                                                                              │
-│ - Real-time system resource monitoring (CPU, memory, disk, network)         │
-│ - Container and service health tracking (Docker, Kubernetes)                │
-│ - Data pipeline status (Kafka, ClickHouse, MongoDB, Redis)                  │
-│ - API and application performance metrics                                   │
-│ - Alert management and incident response                                    │
-│ - Capacity planning and trend analysis                                      │
-│                                                                              │
-│ KEY INFRASTRUCTURE COMPONENTS MONITORED:                                     │
-│ 1. Compute Resources                                                         │
-│    - CPU utilization: Host and per-container                                │
-│    - Memory usage: Host RAM, swap, per-service                              │
-│    - Disk I/O: Read/write throughput, latency                               │
-│    - Network: Bandwidth in/out, packet loss, latency                        │
-│                                                                              │
-│ 2. Data Infrastructure                                                       │
-│    - Kafka: Broker health, lag, throughput (events/sec)                      │
-│    - ClickHouse: Query performance, storage usage, replication               │
-│    - MongoDB: Connection pool, oplog size, index usage                       │
-│    - Redis: Memory usage, eviction rate, commands/sec                        │
-│                                                                              │
-│ 3. Container Orchestration                                                   │
-│    - Docker: Container count, running/stopped, resource limits               │
-│    - Kubernetes: Pod status, node health, resource requests vs actual        │
-│    - Volume mounts: Disk usage per container                                 │
-│                                                                              │
-│ 4. Application Services                                                      │
-│    - NiFi: Processor uptime, data flow rate, queued records                  │
-│    - Grafana: Dashboard loads, user sessions                                 │
-│    - Prometheus: Scrape success rate, sample rate                            │
-│    - API endpoints: Response time, error rate, throughput                    │
-│                                                                              │
-│ DESIGNED FOR:                                                                │
-│ - DevOps Lead: Infrastructure health, capacity planning, incident response  │
-│ - Platform Engineer: Performance tuning, bottleneck identification           │
-│ - SRE Team: Reliability metrics, uptime tracking, scaling decisions          │
-│ - On-call Engineer: Real-time alerts, quick incident diagnosis               │
-│                                                                              │
-│ ASSIGNED TO: @Imrane (DevOps Lead)                                          │
-│ TEAM: @Imrane (infrastructure), @Mouhammed (platform), @Mounir (oversight)  │
-│ TICKET: TICKET-122                                                           │
-└──────────────────────────────────────────────────────────────────────────────┘
-*/
-
 {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": "-- Grafana --",
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
-  },
-  "editable": false,
-  "gnetId": null,
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": ["vertiflow", "operational"],
-      "targetBlank": true,
-      "title": "Operational Cockpit",
-      "tooltip": "Real-time operations monitoring",
-      "type": "dashboards",
-      "url": "/d/operational-cockpit"
-    },
-    {
-      "asDropdown": false,
-      "icon": "doc",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": ["vertiflow", "finance"],
-      "targetBlank": true,
-      "title": "Executive Finance",
-      "tooltip": "Business metrics and profitability",
-      "type": "dashboards",
-      "url": "/d/executive-finance"
-    }
-  ],
+  "links": [],
+  "liveNow": false,
   "panels": [
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 1: INFRASTRUCTURE STATUS CARDS (Top Row)                   ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Quick health check of all critical components           ║
-    ║ Data Source: Prometheus.up{job=~".*"}                            ║
-    ║ Update Interval: Real-time (30-second scrape)                   ║
-    ║ Visualization: Stat cards (color-coded up/down status)           ║
-    ║                                                                   ║
-    ║ Components Monitored:                                             ║
-    ║ 1. Kafka Cluster                                                  ║
-    ║    - Status: UP (green) or DOWN (red)                            ║
-    ║    - Brokers: Count of active broker nodes                       ║
-    ║    - Topics: Number of monitored topics                          ║
-    ║    - Why: If Kafka down, all data pipelines stall                ║
-    ║                                                                   ║
-    ║ 2. ClickHouse Server                                              ║
-    ║    - Status: UP (green) or DOWN (red)                            ║
-    ║    - QPS: Queries per second (target >100 for analytics)         ║
-    ║    - Replicas: Count of healthy replica servers                  ║
-    ║    - Why: OLAP database for all analytics; downtime = no reports ║
-    ║                                                                   ║
-    ║ 3. MongoDB Replica Set                                            ║
-    ║    - Status: Primary UP, Secondaries UP/DOWN                     ║
-    ║    - Connections: Active client connections                      ║
-    ║    - Oplog lag: How far behind replicas are (should be <1s)      ║
-    ║    - Why: Document store for optimization runs, metadata         ║
-    ║                                                                   ║
-    ║ 4. Redis Cache                                                    ║
-    ║    - Status: UP (green) or DOWN (red)                            ║
-    ║    - Memory used: % of configured max                            ║
-    ║    - Commands/sec: Cache hit rate indicator                      ║
-    ║    - Why: In-memory cache; if down, lookups slow                 ║
-    ║                                                                   ║
-    ║ 5. Prometheus Server                                              ║
-    ║    - Status: UP (green) or DOWN (red)                            ║
-    ║    - Scrape rate: % targets successfully scraped                 ║
-    ║    - Storage: TSDB disk usage                                    ║
-    ║    - Why: Metrics collection; if down, can't monitor anything    ║
-    ║                                                                   ║
-    ║ 6. Grafana Server                                                 ║
-    ║    - Status: UP (green) or DOWN (red)                            ║
-    ║    - Users online: Active dashboard users                        ║
-    ║    - Request latency: Dashboard load time (should be <200ms)      ║
-    ║    - Why: Visualization platform; users can't view dashboards    ║
-    ║                                                                   ║
-    ║ Why: DevOps lead needs instant view of infrastructure health.    ║
-    ║      Red status = incident. Green = all systems operational.     ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "Prometheus",
-      "description": "Quick health check: Critical infrastructure components",
+      "datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"},
       "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "text": "DOWN"
-                },
-                "1": {
-                  "color": "green",
-                  "text": "UP"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "max": 1,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short"
-        },
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [{"options": {"0": {"color": "red", "text": "DOWN"}, "1": {"color": "green", "text": "UP"}}, "type": "value"}], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}},
         "overrides": []
       },
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 0},
       "id": 1,
-      "options": {
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "values": false,
-          "fields": "",
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "up{job=\"kafka\"} OR on() vector(0)",
-          "legendFormat": "Kafka",
-          "refId": "A"
-        },
-        {
-          "expr": "up{job=\"clickhouse\"} OR on() vector(0)",
-          "legendFormat": "ClickHouse",
-          "refId": "B"
-        },
-        {
-          "expr": "up{job=\"mongodb\"} OR on() vector(0)",
-          "legendFormat": "MongoDB",
-          "refId": "C"
-        },
-        {
-          "expr": "up{job=\"redis\"} OR on() vector(0)",
-          "legendFormat": "Redis",
-          "refId": "D"
-        },
-        {
-          "expr": "up{job=\"prometheus\"} OR on() vector(0)",
-          "legendFormat": "Prometheus",
-          "refId": "E"
-        },
-        {
-          "expr": "up{job=\"grafana\"} OR on() vector(0)",
-          "legendFormat": "Grafana",
-          "refId": "F"
-        }
-      ],
-      "title": "🚨 INFRASTRUCTURE STATUS",
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"}, "expr": "up{job=\"prometheus\"}", "legendFormat": "Prometheus", "refId": "A"}],
+      "title": "Prometheus",
       "type": "stat"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 2: CPU & MEMORY UTILIZATION (Host Level)                   ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Track compute resource usage across infrastructure       ║
-    ║ Data Source: Prometheus (node-exporter metrics)                  ║
-    ║ Update Interval: Real-time (15-second intervals)                 ║
-    ║ Visualization: Dual-axis line chart with thresholds              ║
-    ║                                                                   ║
-    ║ Metrics:                                                          ║
-    ║ 1. CPU Utilization %                                              ║
-    ║    - Formula: (1 - idle_time) × 100                               ║
-    ║    - Yellow threshold: >70% (approaching saturation)              ║
-    ║    - Red threshold: >90% (at saturation)                          ║
-    ║    - Why: If sustained >85%, may need to scale vertically         ║
-    ║                                                                   ║
-    ║ 2. Memory Utilization %                                           ║
-    ║    - Formula: (used_bytes / total_bytes) × 100                    ║
-    ║    - Yellow threshold: >80% (memory pressure)                     ║
-    ║    - Red threshold: >95% (critical, may trigger OOM killer)       ║
-    ║    - Why: Linux will kill processes if memory exhausted           ║
-    ║                                                                   ║
-    ║ Per-Host Breakdown:                                               ║
-    ║ - api-server-1, api-server-2: Should be similar load              ║
-    ║ - data-warehouse-1: Higher memory (ClickHouse)                    ║
-    ║ - kafka-broker-1,2,3: Balanced load (cluster)                     ║
-    ║ - gpu-node-1 (optional): GPU compute for ML inference              ║
-    ║                                                                   ║
-    ║ Why: Operators need to know when to add resources:                ║
-    ║      - High CPU: Can add CPU cores or distribute load             ║
-    ║      - High memory: Add RAM or tune application settings           ║
-    ║      - Trending up: Plan scale-out before crisis                  ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "Prometheus",
-      "description": "Host-level CPU and memory utilization (per node)",
+      "datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"},
       "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Utilization (%)",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "percent"
-        },
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [{"options": {"0": {"color": "red", "text": "DOWN"}, "1": {"color": "green", "text": "UP"}}, "type": "value"}], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}},
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 6
-      },
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 0},
       "id": 2,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "max", "last"],
-          "displayMode": "table",
-          "placement": "right"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"}, "expr": "up{job=\"grafana\"}", "legendFormat": "Grafana", "refId": "A"}],
+      "title": "Grafana",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [{"options": {"0": {"color": "red", "text": "DOWN"}, "1": {"color": "green", "text": "UP"}}, "type": "value"}], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}},
+        "overrides": []
       },
-      "pluginVersion": "8.0.0",
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
+      "id": 3,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"}, "expr": "up{job=\"node-exporter\"}", "legendFormat": "Node", "refId": "A"}],
+      "title": "Node Exporter",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [{"options": {"match": "null", "result": {"color": "red", "text": "DOWN"}}, "type": "special"}, {"options": {"from": 1, "to": 999999999, "result": {"color": "green", "text": "UP"}}, "type": "range"}], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}},
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 0},
+      "id": 4,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT count() FROM vertiflow.basil_ultimate_realtime LIMIT 1", "refId": "A"}],
+      "title": "ClickHouse",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"},
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 0},
+      "id": 5,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT count() as total FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "📊 Total Records",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"},
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 0},
+      "id": 6,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT count(DISTINCT zone_id) as zones FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "🏢 Zones",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 20, "gradientMode": "opacity", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "line"}}, "mappings": [], "max": 100, "min": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 90}]}, "unit": "percent"},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "id": 7,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "pluginVersion": "10.1.5",
       "targets": [
-        {
-          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
-          "legendFormat": "{{instance}} CPU",
-          "refId": "A"
-        },
-        {
-          "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
-          "legendFormat": "{{instance}} Memory",
-          "refId": "B"
-        },
-        {
-          "expr": "70",
-          "legendFormat": "CPU Warning (70%)",
-          "refId": "C"
-        },
-        {
-          "expr": "90",
-          "legendFormat": "CPU Critical (90%)",
-          "refId": "D"
-        }
+        {"datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"}, "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)", "legendFormat": "CPU Usage", "refId": "A"},
+        {"datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"}, "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100", "legendFormat": "Memory Usage", "refId": "B"}
       ],
-      "title": "💻 CPU & MEMORY UTILIZATION",
+      "title": "💻 CPU & Memory Usage",
       "type": "timeseries"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 3: DISK USAGE & I/O PERFORMANCE                            ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Monitor storage capacity and disk I/O health             ║
-    ║ Data Source: Prometheus (node-exporter + block device metrics)   ║
-    ║ Update Interval: 1-minute intervals                              ║
-    ║ Visualization: Gauge charts (disk capacity) + bar chart (I/O)    ║
-    ║                                                                   ║
-    ║ Disk Space Monitoring:                                            ║
-    ║ 1. Root filesystem (/)                                            ║
-    ║    - Yellow: >75% capacity                                        ║
-    ║    - Red: >90% capacity (will cause service disruptions)          ║
-    ║                                                                   ║
-    ║ 2. Data partition (/data)                                         ║
-    ║    - Holds ClickHouse data, Kafka logs, MongoDB                   ║
-    ║    - Yellow: >80% (growth trajectory concerning)                  ║
-    ║    - Red: >95% (immediate action required)                        ║
-    ║                                                                   ║
-    ║ 3. Log partition (/var/log)                                       ║
-    ║    - Application logs, system logs                                ║
-    ║    - Should have cleanup policies (logrotate)                     ║
-    ║    - Yellow: >70% (logs filling fast)                             ║
-    ║                                                                   ║
-    ║ Disk I/O Metrics:                                                 ║
-    ║ - Read throughput (MB/s): Typical 50-200MB/s for analytics       ║
-    ║ - Write throughput (MB/s): Typical 20-100MB/s for logging        ║
-    ║ - Read latency (ms): Should be <5ms for HDDs, <1ms for SSDs      ║
-    ║ - Write latency (ms): Should be <10ms                             ║
-    ║ - IOPS: Random I/O operations/sec (affects database performance) ║
-    ║                                                                   ║
-    ║ Why: Storage capacity is fixed; need to know when to:            ║
-    ║      - Archive old data (Kafka, ClickHouse)                       ║
-    ║      - Add storage (expensive, plan ahead)                        ║
-    ║      - Optimize compression (data warehouse)                      ║
-    ║      - Investigate I/O bottlenecks (query slowness)               ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "Prometheus",
-      "description": "Disk space usage and I/O performance metrics",
+      "datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"},
       "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "displayMode": "color-background",
-            "filterable": false
-          },
-          "mappings": [],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "percent"
-        },
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "max": 100, "min": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 85}]}, "unit": "percent"},
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 6
-      },
-      "id": 3,
-      "options": {
-        "orientation": "auto",
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "(node_filesystem_size_bytes{mountpoint=\"/\"} - node_filesystem_avail_bytes{mountpoint=\"/\"}) / node_filesystem_size_bytes{mountpoint=\"/\"} * 100",
-          "legendFormat": "/ (Root)",
-          "refId": "A"
-        },
-        {
-          "expr": "(node_filesystem_size_bytes{mountpoint=\"/data\"} - node_filesystem_avail_bytes{mountpoint=\"/data\"}) / node_filesystem_size_bytes{mountpoint=\"/data\"} * 100",
-          "legendFormat": "/data (Storage)",
-          "refId": "B"
-        },
-        {
-          "expr": "(node_filesystem_size_bytes{mountpoint=\"/var/log\"} - node_filesystem_avail_bytes{mountpoint=\"/var/log\"}) / node_filesystem_size_bytes{mountpoint=\"/var/log\"} * 100",
-          "legendFormat": "/var/log (Logs)",
-          "refId": "C"
-        }
-      ],
-      "title": "💾 DISK USAGE & I/O",
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 4},
+      "id": 8,
+      "options": {"orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showThresholdLabels": false, "showThresholdMarkers": true},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"}, "expr": "(1 - (node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})) * 100", "legendFormat": "Disk Usage", "refId": "A"}],
+      "title": "💾 Disk Usage",
       "type": "gauge"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 4: DATA PIPELINE HEALTH (Kafka, ClickHouse, MongoDB)       ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Monitor health of core data infrastructure               ║
-    ║ Data Source: Prometheus (Kafka exporter, ClickHouse metrics)     ║
-    ║ Update Interval: 30-second intervals                             ║
-    ║ Visualization: Stat cards + line charts                          ║
-    ║                                                                   ║
-    ║ Kafka Metrics:                                                    ║
-    ║ 1. Broker health                                                  ║
-    ║    - Count: How many brokers online (target 3 for HA)             ║
-    ║    - Leader balance: Are partitions evenly distributed?           ║
-    ║                                                                   ║
-    ║ 2. Message throughput                                             ║
-    ║    - Bytes in/sec: Producers writing at expected rate             ║
-    ║    - Bytes out/sec: Consumers reading (should be ~equal)          ║
-    ║                                                                   ║
-    ║ 3. Consumer lag                                                   ║
-    ║    - telemetry-processing: Should be <10s (real-time pipeline)    ║
-    ║    - daily-aggregation: Can lag 1-2h (batch processing)           ║
-    ║    - Lag >lag_threshold = data not flowing to consumers           ║
-    ║                                                                   ║
-    ║ ClickHouse Metrics:                                               ║
-    ║ 1. Query performance                                              ║
-    ║    - QPS (queries/sec): Should be stable and predictable          ║
-    ║    - Slow queries: Count with >5s duration                        ║
-    ║    - Average latency: Spike indicates performance issues          ║
-    ║                                                                   ║
-    ║ 2. Replication lag                                                ║
-    ║    - Should be <1s (seconds behind primary)                       ║
-    ║    - >5s = replication bottleneck (investigate network/disk)      ║
-    ║                                                                   ║
-    ║ MongoDB Metrics:                                                  ║
-    ║ 1. Replication status                                             ║
-    ║    - Primary: Should be exactly 1                                 ║
-    ║    - Secondary count: Should match configuration (2 for 3-node)   ║
-    ║    - Arbiter: Optional node for breaking ties                     ║
-    ║                                                                   ║
-    ║ 2. Oplog entries                                                  ║
-    ║    - Should be steady (number of changes per minute)              ║
-    ║    - Spike = high change rate (normal during data import)         ║
-    ║                                                                   ║
-    ║ Why: Data pipeline health is critical. If any component is        ║
-    ║      degraded, the entire analytics system will be affected.      ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "Prometheus",
-      "description": "Data pipeline health: Kafka, ClickHouse, MongoDB metrics",
+      "datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"},
       "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Throughput",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "max": null,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "bytes"},
         "overrides": []
       },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 14
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 4},
+      "id": 9,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"}, "expr": "node_memory_MemTotal_bytes", "legendFormat": "Total Memory", "refId": "A"}],
+      "title": "🧠 Total Memory",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "bytes"},
+        "overrides": []
       },
-      "id": 4,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "max"],
-          "displayMode": "table",
-          "placement": "right"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 8},
+      "id": 10,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "prometheus", "uid": "eac5c342-46aa-46b8-934f-8e09892a5192"}, "expr": "node_memory_MemAvailable_bytes", "legendFormat": "Available Memory", "refId": "A"}],
+      "title": "🟢 Available Memory",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 80, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"},
+        "overrides": []
       },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "kafka_brokers_online",
-          "legendFormat": "Kafka Brokers",
-          "refId": "A"
-        },
-        {
-          "expr": "rate(kafka_messages_in_per_sec[5m])",
-          "legendFormat": "Kafka In (msg/s)",
-          "refId": "B"
-        },
-        {
-          "expr": "kafka_consumer_lag_seconds{group=\"telemetry-processing\"}",
-          "legendFormat": "Telemetry Consumer Lag",
-          "refId": "C"
-        },
-        {
-          "expr": "clickhouse_query_duration_seconds_total",
-          "legendFormat": "ClickHouse Query Latency",
-          "refId": "D"
-        },
-        {
-          "expr": "mongodb_replica_set_members",
-          "legendFormat": "MongoDB Replica Members",
-          "refId": "E"
-        }
-      ],
-      "title": "📊 DATA PIPELINE HEALTH",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "id": 11,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 0, "rawSql": "SELECT toStartOfMinute(timestamp) as time, count() as records FROM vertiflow.basil_ultimate_realtime GROUP BY time ORDER BY time", "refId": "A"}],
+      "title": "📈 Data Ingestion Rate",
       "type": "timeseries"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 5: CONTAINER & SERVICE STATUS                              ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Track Docker container health and service availability   ║
-    ║ Data Source: Docker API / cAdvisor metrics                        ║
-    ║ Update Interval: 30-second intervals                             ║
-    ║ Visualization: Table with status indicators                      ║
-    ║                                                                   ║
-    ║ Containers Monitored:                                             ║
-    ║ 1. API Server (Python FastAPI)                                    ║
-    ║    - Replicas: 2-4 (for high availability)                        ║
-    ║    - Health: Readiness probe (HTTP GET /health)                   ║
-    ║    - CPU: <100% per instance                                      ║
-    ║    - Memory: <500MB per instance                                  ║
-    ║    - Uptime: Should be >30 days (unless updated)                  ║
-    ║                                                                   ║
-    ║ 2. NiFi Flow Processor                                             ║
-    ║    - Single instance (can be HA with load balancer)               ║
-    ║    - Health: Check processor queue sizes                          ║
-    ║    - Throughput: Documents processed per minute                   ║
-    ║    - Memory: NiFi uses Java heap (4-8GB typical)                  ║
-    ║                                                                   ║
-    ║ 3. Kafka Brokers                                                  ║
-    ║    - Count: 3 brokers for HA (one can fail, still operational)    ║
-    ║    - Port: 9092 (internal), 29092 (Docker network)                ║
-    ║    - JVM memory: ~4GB per broker                                  ║
-    ║                                                                   ║
-    ║ 4. ClickHouse Server                                              ║
-    ║    - Single instance (could be HA cluster)                        ║
-    ║    - Memory: Reserved for data caching (8-16GB)                   ║
-    ║    - CPU: Should spike during query spikes                        ║
-    ║                                                                   ║
-    ║ 5. MongoDB                                                        ║
-    ║    - Replica set (3 nodes: 1 primary + 2 secondaries)             ║
-    ║    - Memory: Working set should be <available RAM                 ║
-    ║                                                                   ║
-    ║ 6. Redis Cache                                                    ║
-    ║    - Single instance (could be sentinel for HA)                   ║
-    ║    - Memory: Cache size should be tuned to working set            ║
-    ║    - Eviction policy: Typically maxmemory-policy = allkeys-lru     ║
-    ║                                                                   ║
-    ║ 7. Grafana Dashboard UI                                           ║
-    ║    - Single instance                                              ║
-    ║    - Users online: Should be low-memory (stateless)               ║
-    ║    - Requests: Spike during business hours                        ║
-    ║                                                                   ║
-    ║ 8. Prometheus Metrics Server                                      ║
-    ║    - Single instance                                              ║
-    ║    - Storage: TSDB database (grows ~1-2GB per day)                ║
-    ║    - Scrape success: Should be ~99% (targets responsive)          ║
-    ║                                                                   ║
-    ║ Why: Container health is visibility into service availability.    ║
-    ║      Crashed container = no service for that component.           ║
-    ║      High memory = may be memory leak or misconfiguration.        ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "Prometheus",
-      "description": "Container and service status with resource usage",
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
       "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "displayMode": "color-background",
-            "filterable": true
-          },
-          "mappings": [
-            {
-              "options": {
-                "running": {
-                  "color": "green",
-                  "text": "Running"
-                },
-                "exited": {
-                  "color": "red",
-                  "text": "Stopped"
-                },
-                "restarting": {
-                  "color": "orange",
-                  "text": "Restarting"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "max": null,
-          "min": null,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
+        "defaults": {"color": {"mode": "thresholds"}, "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}},
         "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "CPU"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "percent"
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Memory"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "megabytes"
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background"
-              }
-            ]
-          }
+          {"matcher": {"id": "byName", "options": "records"}, "properties": [{"id": "custom.cellOptions", "value": {"mode": "gradient", "type": "gauge"}}]},
+          {"matcher": {"id": "byName", "options": "avg_temp"}, "properties": [{"id": "unit", "value": "celsius"}]},
+          {"matcher": {"id": "byName", "options": "avg_humidity"}, "properties": [{"id": "unit", "value": "percent"}]}
         ]
       },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 14
-      },
-      "id": 5,
-      "options": {
-        "showHeader": true,
-        "sortBy": [
-          {
-            "displayName": "Status",
-            "desc": false
-          }
-        ]
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "format": "table",
-          "instant": true,
-          "queryType": "randomWalk",
-          "refId": "A",
-          "datasource": "Prometheus",
-          "rawSql": "SELECT\n  container_name,\n  container_status,\n  ROUND(cpu_usage_percent, 1) as cpu,\n  ROUND(memory_usage_mb, 0) as memory,\n  ROUND(uptime_hours, 0) as uptime,\n  restart_count\nFROM container.status\nWHERE container_status != 'exited'\nORDER BY container_name"
-        }
-      ],
-      "title": "🐳 CONTAINER & SERVICE STATUS",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "id": 12,
+      "options": {"footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true, "sortBy": [{"desc": true, "displayName": "records"}]},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT zone_id, count() as records, round(avg(air_temp_internal), 1) as avg_temp, round(avg(air_humidity), 1) as avg_humidity, round(avg(water_ph), 2) as avg_ph, round(avg(co2_level_ambient), 0) as avg_co2 FROM vertiflow.basil_ultimate_realtime GROUP BY zone_id ORDER BY records DESC", "refId": "A"}],
+      "title": "📋 Zone Statistics",
       "type": "table"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 6: NETWORK PERFORMANCE & LATENCY                           ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Monitor network health between components                ║
-    ║ Data Source: Prometheus (network metrics) + ping/traceroute       ║
-    ║ Update Interval: 30-second intervals                             ║
-    ║ Visualization: Line chart (latency) + heatmap (packet loss)      ║
-    ║                                                                   ║
-    ║ Network Metrics:                                                  ║
-    ║ 1. API to Kafka latency                                           ║
-    ║    - Should be <50ms (local network)                              ║
-    ║    - If >200ms: Network congestion or DNS resolution issue        ║
-    ║                                                                   ║
-    ║ 2. Kafka to ClickHouse latency                                    ║
-    ║    - Data pipeline latency                                        ║
-    ║    - Should be <100ms                                             ║
-    ║    - Important: Affects dashboard refresh lag                     ║
-    ║                                                                   ║
-    ║ 3. API to MongoDB latency                                         ║
-    ║    - Document lookups in optimization data                        ║
-    ║    - Should be <30ms                                              ║
-    ║                                                                   ║
-    ║ 4. Prometheus scrape latency                                      ║
-    ║    - Time to scrape all targets                                   ║
-    ║    - Should be <10s for 100+ targets                              ║
-    ║    - If >15s: Some targets are slow or unresponsive               ║
-    ║                                                                   ║
-    ║ 5. Bandwidth usage                                                ║
-    ║    - Ingress: Incoming data (should be stable)                    ║
-    ║    - Egress: Outgoing data (Kafka replication, backups)           ║
-    ║    - Alert if >80% of link capacity                               ║
-    ║                                                                   ║
-    ║ 6. Packet loss                                                    ║
-    ║    - Should be 0%                                                 ║
-    ║    - >0.1% indicates network quality issues                       ║
-    ║    - >1%: Critical, investigate immediately                       ║
-    ║                                                                   ║
-    ║ Why: Network is critical glue between components.                 ║
-    ║      High latency = data pipelines stall.                         ║
-    ║      Packet loss = unreliable message delivery.                   ║
-    ║      Bandwidth exhaustion = all services slow down.               ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "Prometheus",
-      "description": "Network latency between components and bandwidth usage",
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
       "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Latency (ms)",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "max": null,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 100
-              },
-              {
-                "color": "red",
-                "value": 200
-              }
-            ]
-          },
-          "unit": "ms"
-        },
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}},
         "overrides": []
       },
-      "gridPos": {
-        "h": 9,
-        "w": 24,
-        "x": 0,
-        "y": 23
-      },
-      "id": 6,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "max"],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "probe_http_duration_seconds{job=\"api-kafka-latency\"} * 1000",
-          "legendFormat": "API → Kafka",
-          "refId": "A"
-        },
-        {
-          "expr": "probe_http_duration_seconds{job=\"kafka-clickhouse-latency\"} * 1000",
-          "legendFormat": "Kafka → ClickHouse",
-          "refId": "B"
-        },
-        {
-          "expr": "probe_http_duration_seconds{job=\"api-mongodb-latency\"} * 1000",
-          "legendFormat": "API → MongoDB",
-          "refId": "C"
-        },
-        {
-          "expr": "prometheus_sd_consul_rpc_duration_seconds * 1000",
-          "legendFormat": "Prometheus Scrape Time",
-          "refId": "D"
-        }
-      ],
-      "title": "🌐 NETWORK LATENCY & BANDWIDTH",
-      "type": "timeseries"
+      "gridPos": {"h": 4, "w": 8, "x": 0, "y": 20},
+      "id": 13,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT min(timestamp) as first FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "📅 First Record",
+      "type": "stat"
     },
-
-    /*
-    ╔═══════════════════════════════════════════════════════════════════╗
-    ║ PANEL 7: ALERT SUMMARY & INCIDENT TRACKER                        ║
-    ╠═══════════════════════════════════════════════════════════════════╣
-    ║ Purpose: Real-time alert management and incident response        ║
-    ║ Data Source: Prometheus AlertManager                             ║
-    ║ Update Interval: Real-time (webhook updates)                     ║
-    ║ Visualization: Alert summary table                               ║
-    ║                                                                   ║
-    ║ Critical Alerts Configured:                                       ║
-    ║ 1. Service Down Alerts                                            ║
-    ║    - Kafka cluster any broker down                                ║
-    ║    - ClickHouse unavailable                                       ║
-    ║    - MongoDB primary down                                         ║
-    ║    - Action: Immediate investigation + escalation                 ║
-    ║                                                                   ║
-    ║ 2. Resource Exhaustion Alerts                                      ║
-    ║    - CPU >90% for 5 minutes                                        ║
-    ║    - Memory >95%                                                  ║
-    ║    - Disk >90% (requires immediate cleanup/expansion)             ║
-    ║    - Action: Scale up or investigate spike                        ║
-    ║                                                                   ║
-    ║ 3. Data Pipeline Alerts                                           ║
-    ║    - Consumer lag >30s for real-time pipeline                      ║
-    ║    - ClickHouse replication lag >10s                              ║
-    ║    - Prometheus scrape failures >10%                              ║
-    ║    - Action: Check Kafka health, network connectivity             ║
-    ║                                                                   ║
-    ║ 4. Application Performance Alerts                                 ║
-    ║    - API response time >1000ms (p99)                              ║
-    ║    - Error rate >1%                                               ║
-    ║    - Database connection pool exhausted                           ║
-    ║    - Action: Check query performance, load                        ║
-    ║                                                                   ║
-    ║ 5. Security Alerts (optional)                                     ║
-    ║    - Failed authentication attempts spike                         ║
-    ║    - Unusual network traffic patterns                             ║
-    ║    - Action: Review logs, investigate source                      ║
-    ║                                                                   ║
-    ║ Alert States:                                                     ║
-    ║ - Firing: Alert condition is true (action required)               ║
-    ║ - Resolved: Alert condition no longer true (investigation done)   ║
-    ║ - Silenced: Maintenance window (temporary disable)                ║
-    ║                                                                   ║
-    ║ Alert Routing:                                                    ║
-    ║ - Critical (P1): Page on-call engineer via PagerDuty              ║
-    ║ - High (P2): Send to Slack #alerts channel                        ║
-    ║ - Medium (P3): Log to incident tracker, daily digest              ║
-    ║                                                                   ║
-    ║ Why: On-call engineer needs rapid awareness of production         ║
-    ║      issues. Alert fatigue is real: must be selective.            ║
-    ║      Configure only high-impact, actionable alerts.               ║
-    ╚═══════════════════════════════════════════════════════════════════╝
-    */
     {
-      "datasource": "Prometheus",
-      "description": "Active alerts and incident summary",
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
       "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "displayMode": "color-background",
-            "filterable": true
-          },
-          "mappings": [
-            {
-              "options": {
-                "Firing": {
-                  "color": "red",
-                  "text": "🔴 FIRING"
-                },
-                "Resolved": {
-                  "color": "green",
-                  "text": "✅ Resolved"
-                },
-                "Silenced": {
-                  "color": "orange",
-                  "text": "🔇 Silenced"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "max": null,
-          "min": null,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}},
         "overrides": []
       },
-      "gridPos": {
-        "h": 9,
-        "w": 24,
-        "x": 0,
-        "y": 32
+      "gridPos": {"h": 4, "w": 8, "x": 8, "y": 20},
+      "id": 14,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT max(timestamp) as last FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "📅 Last Record",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"},
+        "overrides": []
       },
-      "id": 7,
-      "options": {
-        "showHeader": true,
-        "sortBy": [
-          {
-            "displayName": "Severity",
-            "desc": true
-          }
-        ]
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "ALERTS",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "🚨 ACTIVE ALERTS & INCIDENTS",
-      "type": "table"
+      "gridPos": {"h": 4, "w": 8, "x": 16, "y": 20},
+      "id": 15,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10.1.5",
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "aeb1b4ee-1f88-42c3-a35a-f594cac90e00"}, "format": 1, "rawSql": "SELECT count(DISTINCT batch_id) as batches FROM vertiflow.basil_ultimate_realtime", "refId": "A"}],
+      "title": "🌱 Total Batches",
+      "type": "stat"
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 35,
+  "schemaVersion": 38,
   "style": "dark",
-  "tags": ["vertiflow", "infrastructure", "monitoring", "devops", "sre"],
-  "templating": {
-    "list": [
-      {
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
-        "definition": "label_values(up, instance)",
-        "description": null,
-        "error": null,
-        "hide": 0,
-        "includeAll": true,
-        "label": "Instance",
-        "multi": true,
-        "name": "instance",
-        "options": [],
-        "query": {
-          "query": "label_values(up, instance)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
-        "definition": "label_values(container_last_seen, container_name)",
-        "description": null,
-        "error": null,
-        "hide": 0,
-        "includeAll": true,
-        "label": "Container",
-        "multi": true,
-        "name": "container",
-        "options": [],
-        "query": {
-          "query": "label_values(container_last_seen, container_name)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query"
-      }
-    ]
-  },
-  "time": {
-    "from": "now-6h",
-    "to": "now"
-  },
-  "timepicker": {
-    "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
-  },
-  "timezone": "UTC",
-  "title": "VertiFlow System Health & Infrastructure Dashboard",
-  "uid": "system-health",
-  "version": 1
+  "tags": ["vertiflow", "system", "health", "monitoring"],
+  "templating": {"list": []},
+  "time": {"from": "now-24h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "VertiFlow System Health",
+  "uid": "system-health-dashboard",
+  "version": 1,
+  "weekStart": ""
 }
-
-/*
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                            IMPLEMENTATION NOTES                              ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║                                                                              ║
-║ INSTALLATION:                                                                ║
-║ 1. Save this file as: dashboards/grafana/04_system_health.json              ║
-║ 2. Import to Grafana: Home → Dashboards → Import → Paste JSON               ║
-║ 3. Configure data sources:                                                   ║
-║    - Prometheus: Infrastructure metrics (node-exporter, cAdvisor)            ║
-║    - AlertManager: Real-time alert status                                    ║
-║                                                                              ║
-║ DATA DEPENDENCIES:                                                           ║
-║ 1. Host Metrics (node-exporter)                                              ║
-║    ├─ Source: Prometheus node-exporter on each host                          ║
-║    ├─ Metrics: cpu, memory, disk, network, processes                         ║
-║    └─ Update: 15-30 second intervals                                         ║
-║                                                                              ║
-║ 2. Container Metrics (cAdvisor / Docker)                                     ║
-║    ├─ Source: Docker stats API / cAdvisor                                    ║
-║    ├─ Metrics: container CPU, memory, I/O, network per container             ║
-║    └─ Update: 30-60 second intervals                                         ║
-║                                                                              ║
-║ 3. Service-Specific Metrics                                                  ║
-║    ├─ Kafka: JMX exporter for broker metrics                                 ║
-║    ├─ ClickHouse: Native HTTP metrics endpoint                               ║
-║    ├─ MongoDB: MongoDB exporter                                              ║
-║    └─ Redis: Redis exporter                                                  ║
-║                                                                              ║
-║ 4. Alert Rules                                                               ║
-║    ├─ Source: prometheus/alerts.yml                                          ║
-║    ├─ Types: Service down, resource exhaustion, pipeline health              ║
-║    └─ Update: Real-time (webhook from AlertManager)                          ║
-║                                                                              ║
-║ RECOMMENDED ALERT RULES (prometheus/alerts.yml):                             ║
-║                                                                              ║
-║ # Service Down Alerts                                                        ║
-║ - alert: KafkaClusterDown                                                    ║
-║   expr: count(up{job="kafka"}) < 3                                           ║
-║   for: 2m                                                                    ║
-║   annotations:                                                               ║
-║     severity: critical                                                       ║
-║     summary: "Kafka cluster degraded"                                        ║
-║     description: "Fewer than 3 brokers online"                               ║
-║                                                                              ║
-║ # Resource Exhaustion                                                        ║
-║ - alert: HighCPUUsage                                                        ║
-║   expr: (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 0.9      ║
-║   for: 5m                                                                    ║
-║   annotations:                                                               ║
-║     severity: warning                                                        ║
-║     summary: "High CPU utilization"                                          ║
-║                                                                              ║
-║ - alert: HighMemoryUsage                                                     ║
-║   expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.95
-║   for: 3m                                                                    ║
-║   annotations:                                                               ║
-║     severity: warning                                                        ║
-║     summary: "Memory approaching exhaustion"                                 ║
-║                                                                              ║
-║ - alert: DiskFull                                                            ║
-║   expr: node_filesystem_avail_bytes{mountpoint="/"} < 2*1024*1024*1024      ║
-║   for: 5m                                                                    ║
-║   annotations:                                                               ║
-║     severity: critical                                                       ║
-║     summary: "Disk space critical"                                           ║
-║                                                                              ║
-║ # Data Pipeline Health                                                       ║
-║ - alert: KafkaConsumerLagHigh                                                ║
-║   expr: kafka_consumer_lag_seconds{group="telemetry-processing"} > 30        ║
-║   for: 5m                                                                    ║
-║   annotations:                                                               ║
-║     severity: warning                                                        ║
-║     summary: "Consumer lag exceeded threshold"                               ║
-║                                                                              ║
-║ - alert: ClickHouseReplicationLag                                             ║
-║   expr: clickhouse_replica_internal_replication_delay_seconds > 10           ║
-║   for: 3m                                                                    ║
-║   annotations:                                                               ║
-║     severity: warning                                                        ║
-║     summary: "ClickHouse replica lagging"                                    ║
-║                                                                              ║
-║ # Application Performance                                                    ║
-║ - alert: HighAPILatency                                                      ║
-║   expr: histogram_quantile(0.99, rate(http_request_duration_seconds[5m])) > 1
-║   for: 5m                                                                    ║
-║   annotations:                                                               ║
-║     severity: warning                                                        ║
-║     summary: "API response time high"                                        ║
-║                                                                              ║
-║ DASHBOARD USAGE:                                                             ║
-║ 1. Daily Check: Review Panel 1 (status cards) each morning                   ║
-║ 2. Escalation: If ANY red card → immediate investigation                     ║
-║ 3. Capacity Planning: Check CPU/Memory/Disk trends monthly                   ║
-║ 4. Incident Response:                                                        ║
-║    - Jump to Panel 2 (CPU/Memory) to find resource hog                       ║
-║    - Jump to Panel 4 (Pipeline) to diagnose data flow issue                   ║
-║    - Jump to Panel 7 (Alerts) to understand what triggered                   ║
-║ 5. Performance Tuning: Review Panel 6 (Latency) weekly                       ║
-║                                                                              ║
-║ ON-CALL RUNBOOK:                                                             ║
-║ Alert Fired → Check Dashboard → Identify Root Cause → Take Action            ║
-║                                                                              ║
-║ Service Down (Red in Panel 1)?                                               ║
-║   → Jump to Panel 5 (Containers)                                             ║
-║   → Find container with status "Stopped"                                     ║
-║   → SSH to host: docker restart <container_name>                             ║
-║   → Verify it returns to "Running" status                                    ║
-║   → Investigation: Check logs for error: docker logs <container_name>        ║
-║                                                                              ║
-║ High CPU (Red in Panel 2)?                                                   ║
-║   → Jump to Panel 5 (Containers)                                             ║
-║   → Find container with highest CPU %                                        ║
-║   → SSH to host: docker stats --no-stream | grep <container>                 ║
-║   → Check application logs for runaway process                               ║
-║   → Possible actions:                                                        ║
-║     - Restart container (often fixes memory leaks)                           ║
-║     - Increase CPU allocation (vertical scale)                               ║
-║     - Scale out (add more replicas for stateless services)                   ║
-║                                                                              ║
-║ Consumer Lag High (Panel 4)?                                                 ║
-║   → Check if Kafka brokers are up (Panel 1)                                  ║
-║   → Check Kafka throughput (Panel 4, Kafka In msg/s)                         ║
-║   → If throughput spike: likely consumer can't keep up                       ║
-║   → Scale consumer: increase parallelism in config                           ║
-║   → If no throughput spike: consumer likely crashed                          ║
-║   → Restart consumer application                                             ║
-║                                                                              ║
-║ Disk Full (Panel 3)?                                                         ║
-║   → SSH to host: df -h to see usage                                          ║
-║   → Find largest directories: du -sh /var/log /data/*                        ║
-║   → Options:                                                                 ║
-║     - Archive old Kafka logs: kafka-log-dirs delete                          ║
-║     - Cleanup old ClickHouse parts: ALTER TABLE ... DELETE                   ║
-║     - Rotate application logs: logrotate trigger                             ║
-║     - Expand storage: add volume to /data partition                          ║
-║                                                                              ║
-║ ACCESS CONTROL:                                                              ║
-║ - DevOps: Full read/write access                                             ║
-║ - SRE: Full read/write access                                                ║
-║ - Platform engineers: Read-only (learn operations)                           ║
-║ - Management: Alert summary view only                                        ║
-║                                                                              ║
-║ MAINTENANCE SCHEDULE:                                                        ║
-║ - Daily: Check Panel 1 status, review Panel 7 alerts                         ║
-║ - Weekly: Capacity trend analysis (Panels 2, 3)                              ║
-║ - Monthly: Performance baselines, alert threshold tuning                      ║
-║ - Quarterly: Disaster recovery drill (simulate failures)                     ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
-DOCUMENT FOOTER:
-═════════════════════════════════════════════════════════════════════════════
-
-TICKET: TICKET-122
-ASSIGNED TO: @Imrane (DevOps Lead)
-TEAM: @Imrane (infrastructure/monitoring), @Mouhammed (platform engineering),
-      @Mounir (architecture oversight)
-
-CONTACT FOR QUESTIONS:
-- @Imrane: Infrastructure health, alert rules, capacity planning, incident response
-- @Mouhammed: Data pipeline configuration, service metrics, troubleshooting
-- @Mounir: Dashboard architecture, long-term infrastructure strategy
-
-PROJECT: VertiFlow Data Platform - Intelligent Vertical Farming
-STATUS: Production Release
-CLASSIFICATION: Technical - Internal
-REPOSITORY: J-Mounir/test-projet-agri (GitHub)
-
-LAST UPDATED: 2026-01-03
-NEXT REVIEW: 2026-02-03 (Monthly)
-
-═════════════════════════════════════════════════════════════════════════════
-*/
