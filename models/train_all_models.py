@@ -332,7 +332,7 @@ class ModelTrainer:
             f1 = f1_score(y_test, y_pred, average="weighted")
 
             # Sauvegarde
-            artifact_path = MODELS_DIR / "quality_classifier_rf.pkl"
+            artifact_path = MODELS_DIR / "rf_quality_v1.pkl"
             with open(artifact_path, "wb") as f:
                 pickle.dump({
                     "model": model,

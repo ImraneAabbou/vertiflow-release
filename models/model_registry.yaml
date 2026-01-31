@@ -1,156 +1,61 @@
-# ==============================================================================
-# VERTIFLOW™ MODEL REGISTRY (TICKET-126)
-# ==============================================================================
-# Date            : 2026-01-03
-# Version         : 1.0.0
-# Author/Team     : @Mouhammed (Data Eng), @Mounir (ML Lead), @Imrane (MLOps)
-# Product Owner   : @MrZakaria
-# Classification  : Internal / Confidential
-# Status          : Production-ready metadata
-# ----------------------------------------------------------------------------
-# PURPOSE
-# --------
-# Central source of truth for all machine learning artifacts referenced by the
-# Nervous System modules:
-#   - OracleML (RandomForestRegressor)
-#   - QualityInspector (RandomForestClassifier)
-#   - HarvestOracle (LSTM forecaster)
-#   - Scaling pipelines shared across models
-#
-# Each entry captures:
-#   • storage path & checksum expectations
-#   • training datasets and feature schema
-#   • KPIs (metrics + acceptance thresholds)
-#   • retraining cadence & responsible team
-#
-# NOTE: Binary weights (.pkl/.h5) are generated via the dedicated training
-# scripts (see models/train_*.py). This registry documents their specs so
-# operators can validate deployments and analysts can audit lineage.
-# ==============================================================================
-
-meta:
-  ticket: TICKET-126
-  last_updated: "2026-01-03T10:00:00Z"
-  next_review: "2026-02-15"
-  contact:
-    owner: "@Mouhammed"
-    ml_lead: "@Mounir"
-    devops: "@Imrane"
-  storage_root: "./models"
-  documentation: "docs/Documentation techniques/08_Model_Governance.md"
-
+version: 1.0.0
+last_updated: '2026-01-31T23:34:19.575968'
 models:
-  - name: "oracle_random_forest"
-    display_name: "Oracle Yield Forecaster (RF)"
-    artifact: "models/oracle_rf.pkl"
-    format: "joblib"
-    framework: "scikit-learn==1.5"
-    trainer_script: "models/train_oracle_model.py"
-    dataset:
-      source: "ClickHouse: telemetry_enriched"
-      window_hours: 24
-      features:
-        - temp_mean_24h
-        - par_mean_24h
-        - humidity_mean_24h
-        - co2_mean_24h
-        - temp_stddev_24h
-      target: "yield_g"
+  oracle_rf:
+    artifact_path: /home/mounirjaouhari/vertiflow_cloud_release/models/oracle_rf.pkl
+    checksum_sha256: bc12d5a443455a7a
     metrics:
-      rmse_g: 4.5
-      r2_score: 0.92
-      coverage: "zones = {ZONE_A, ZONE_B, NURSERY}"
-    retraining:
-      cadence: "Monthly"
-      trigger: "Data drift >5% RMSE degradation"
-    lineage:
-      last_training_run: "2025-12-28"
-      conducted_by: "@Mounir"
-      artifact_checksum_sha256: "<populate after training>"
-
-  - name: "quality_classifier_rf"
-    display_name: "A10 Quality Classifier"
-    artifact: "models/rf_quality_v1.pkl"
-    format: "joblib"
-    framework: "scikit-learn==1.5"
-    trainer_script: "models/train_quality_classifier.py"
-    dataset:
-      source: "ClickHouse: quality_samples"
-      size_rows: 185000
-      features:
-        - air_temp_internal
-        - vapor_pressure_deficit
-        - light_dli_accumulated
-        - nutrient_solution_ec
-        - days_since_planting
-      target: "quality_grade {PREMIUM|STANDARD|REJECT}"
+      rmse: !!python/object/apply:numpy._core.multiarray.scalar
+      - &id001 !!python/object/apply:numpy.dtype
+        args:
+        - f8
+        - false
+        - true
+        state: !!python/tuple
+        - 3
+        - <
+        - null
+        - null
+        - null
+        - -1
+        - -1
+        - 0
+      - !!binary |
+        CfmgZ7PqBUA=
+      r2: 0.9498
+      cv_mean_r2: !!python/object/apply:numpy._core.multiarray.scalar
+      - *id001
+      - !!binary |
+        ke18PzVe7j8=
+      cv_std_r2: !!python/object/apply:numpy._core.multiarray.scalar
+      - *id001
+      - !!binary |
+        rthfdk8eZj8=
+    training_date: '2026-01-31'
+    training_time_seconds: 2.56
+    status: production
+  quality_classifier_rf:
+    artifact_path: /home/mounirjaouhari/vertiflow_cloud_release/models/quality_classifier_rf.pkl
+    checksum_sha256: 5010d660a16a20fb
     metrics:
-      f1_macro: 0.952
-      precision_premium: 0.91
-      recall_reject: 0.89
-    retraining:
-      cadence: "Bi-weekly"
-      trigger: "New cultivar introduction"
-    lineage:
-      last_training_run: "2025-12-22"
-      conducted_by: "@Mouhammed"
-      artifact_checksum_sha256: "<populate after training>"
-
-  - name: "harvest_lstm"
-    display_name: "A9 Harvest Date Forecaster"
-    artifact: "models/lstm_harvest_v1.h5"
-    format: "keras_h5"
-    framework: "TensorFlow==2.15"
-    trainer_script: "models/train_harvest_lstm.py"
-    dataset:
-      source: "ClickHouse: growth_time_series"
-      sequence_length_days: 14
-      features_per_step: 5
-      target: "days_until_harvest"
+      f1_weighted: 0.7231
+    training_date: '2026-01-31'
+    training_time_seconds: 0.39
+    status: production
+  harvest_predictor_rf:
+    artifact_path: /home/mounirjaouhari/vertiflow_cloud_release/models/harvest_predictor_rf.pkl
+    checksum_sha256: 9cb9bce201306883
     metrics:
-      mae_days: 1.9
-      mape: 6.5
-      coverage: "All basil cultivars"
-    retraining:
-      cadence: "Weekly (incremental)"
-      trigger: "Harvest MAE > 2.5 days"
-    lineage:
-      last_training_run: "2025-12-29"
-      conducted_by: "@Mounir"
-      artifact_checksum_sha256: "<populate after training>"
-
-  - name: "telemetry_scaler_pipeline"
-    display_name: "Telemetry Feature Standardizer"
-    artifact: "models/telemetry_scaler.pkl"
-    format: "joblib"
-    framework: "scikit-learn==1.5"
-    trainer_script: "models/train_feature_scaler.py"
-    dataset:
-      source: "ClickHouse: telemetry_enriched"
-      window_days: 30
-      strategy: "StandardScaler per feature"
+      mae_days: 1.42
+    training_date: '2026-01-31'
+    training_time_seconds: 0.36
+    status: production
+  telemetry_scaler:
+    artifact_path: /home/mounirjaouhari/vertiflow_cloud_release/models/telemetry_scaler.pkl
+    checksum_sha256: c9a92f36f1b75c95
     metrics:
-      drift_stat_ks: "p>0.05"
-    retraining:
-      cadence: "Weekly"
-      trigger: "Population drift detected"
-    lineage:
-      last_training_run: "2025-12-27"
-      conducted_by: "@Mouhammed"
-      artifact_checksum_sha256: "<populate after training>"
-
-# ==============================================================================
-# IMPLEMENTATION NOTES
-# ---------------------
-# • Update `artifact_checksum_sha256` after each training run to enable tamper
-#   detection during deployment validation (script: scripts/validate_deployment.py).
-# • This registry is ingested by governance tooling (NiFi Parameter Context) so
-#   keep naming stable.
-# • When adding a new model, append entry + document in docs/Model Governance.
-# ==============================================================================
-# FOOTER
-# ------
-# Ticket : TICKET-126 | Squad: Core Data Foundation
-# Owner  : @Mouhammed | Reviewer: @Mounir | DevOps: @Imrane
-# Contact: data@vertiflow.ai | Last updated: 2026-01-03 | Next review: 2026-02-15
-# ==============================================================================
+      n_features: 7
+      n_samples_fit: 5000
+    training_date: '2026-01-31'
+    training_time_seconds: 0.0
+    status: production
