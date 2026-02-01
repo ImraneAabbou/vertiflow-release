@@ -16,6 +16,7 @@ import time
 import logging
 import sys
 import uuid
+import requests
 from datetime import datetime, timezone
 
 try:
@@ -23,6 +24,10 @@ try:
 except ImportError:
     print("❌ Erreur : kafka-python manquant.")
     sys.exit(1)
+
+import requests
+
+URL = "https://api.open-meteo.com/v1/forecast?latitude=33.5731&longitude=-7.5898&hourly=temperature_2m,relative_humidity_2m,rain,surface_pressure,wind_speed_10m,uv_index,soil_temperature_0cm,soil_moisture_0_to_1cm&daily=sunrise,sunset,uv_index_max,precipitation_sum,et0_fao_evapotranspiration&timezone=Africa/Casablanca"
 
 # Configuration
 KAFKA_BOOTSTRAP = "localhost:9092"
@@ -60,6 +65,22 @@ class VertiFlowExpertSimulator:
         ph_base = 6.2
         hum_base = 65.0
 
+        try:
+            response = requests.get(URL, timeout=.5)
+            response.raise_for_status()
+            data = response.json()
+        except (requests.RequestException, ValueError):
+            data = None  # fallback to null for ClickHouse
+
+        if data:
+            ext_temp_nasa = data['hourly']['temperature_2m'][-1]
+            ext_humidity_nasa = data['hourly']['relative_humidity_2m'][-1]
+            ext_solar_radiation = data['hourly']['uv_index'][-1]
+        else:
+            ext_solar_radiation = 0
+            ext_temp_nasa = 0
+            ext_humidity_nasa = 0
+
         # 2. APPLICATION DE LA DÉRIVE (Si active)
         if system_state["is_drifting"]:
             system_state["drift_intensity"] += 0.05 # Dérive progressive
@@ -72,6 +93,10 @@ class VertiFlowExpertSimulator:
         # 3. GÉNÉRATION DU RECORD (Conforme aux 157 colonnes de 01_tables.sql)
         # Nous remplissons les colonnes clés pour vos alertes NiFi
         record = {
+            "ext_temp_nasa": ext_temp_nasa,
+            "ext_humidity_nasa": ext_humidity_nasa,
+            "ext_solar_radiation": ext_solar_radiation,
+
             # ===============================
             # I. IDENTIFICATION & LINEAGE
             # ===============================
@@ -216,7 +241,7 @@ class VertiFlowExpertSimulator:
                     system_state["is_drifting"] = False
                     system_state["drift_intensity"] = 0.0
 
-                time.sleep(1)
+                time.sleep(.25)
         except KeyboardInterrupt:
             self.producer.close()
 
