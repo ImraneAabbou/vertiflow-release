@@ -1,9 +1,9 @@
 version: 1.0.0
-last_updated: '2026-01-31T23:34:19.575968'
+last_updated: '2026-01-31T23:44:05.055371'
 models:
   oracle_rf:
     artifact_path: /home/mounirjaouhari/vertiflow_cloud_release/models/oracle_rf.pkl
-    checksum_sha256: bc12d5a443455a7a
+    checksum_sha256: 2e4cc783ed1e8b22
     metrics:
       rmse: !!python/object/apply:numpy._core.multiarray.scalar
       - &id001 !!python/object/apply:numpy.dtype
@@ -32,19 +32,19 @@ models:
       - !!binary |
         rthfdk8eZj8=
     training_date: '2026-01-31'
-    training_time_seconds: 2.56
+    training_time_seconds: 2.53
     status: production
   quality_classifier_rf:
-    artifact_path: /home/mounirjaouhari/vertiflow_cloud_release/models/quality_classifier_rf.pkl
-    checksum_sha256: 5010d660a16a20fb
+    artifact_path: /home/mounirjaouhari/vertiflow_cloud_release/models/rf_quality_v1.pkl
+    checksum_sha256: 85ebb0687f774499
     metrics:
       f1_weighted: 0.7231
     training_date: '2026-01-31'
-    training_time_seconds: 0.39
+    training_time_seconds: 0.4
     status: production
   harvest_predictor_rf:
     artifact_path: /home/mounirjaouhari/vertiflow_cloud_release/models/harvest_predictor_rf.pkl
-    checksum_sha256: 9cb9bce201306883
+    checksum_sha256: 6f26ac86cf363c56
     metrics:
       mae_days: 1.42
     training_date: '2026-01-31'
@@ -52,7 +52,7 @@ models:
     status: production
   telemetry_scaler:
     artifact_path: /home/mounirjaouhari/vertiflow_cloud_release/models/telemetry_scaler.pkl
-    checksum_sha256: c9a92f36f1b75c95
+    checksum_sha256: 2044e747f9cc8777
     metrics:
       n_features: 7
       n_samples_fit: 5000

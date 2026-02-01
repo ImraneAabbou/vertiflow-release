@@ -80,13 +80,16 @@ class QualityInspector:
             # Extraction des features alignées avec le simulateur
             features = [
                 data.get('air_temp_internal', 22.0),
-                data.get('vapor_pressure_deficit', 1.0),
-                data.get('light_dli_accumulated', 14.0),
+                data.get('air_humidity', 22.0),
+                data.get('light_intensity_ppfd', 14.0),
+                data.get('co2_level_ambient', 1.0),
                 data.get('nutrient_solution_ec', 1.8),
+                data.get('water_ph', 1.0),
+                data.get('vapor_pressure_deficit', 1.0),
                 data.get('days_since_planting', 20)
             ]
             X = np.array(features).reshape(1, -1)
-            prediction_idx = int(self.model.predict(X)[0])
+            prediction_idx = int(self.model["model"].predict(X)[0])
             grades = ["REJECT", "STANDARD", "PREMIUM"]
             return grades[min(prediction_idx, 2)]
         except Exception as e:
