@@ -52,7 +52,7 @@ services:
 
   # Grafana - Dashboards and visualization
   grafana:
-    image: grafana/grafana:10.1.5
+    image: grafana/grafana:latest
     container_name: grafana
     ports:
       - "3000:3000"
@@ -60,6 +60,7 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
     volumes:
       - grafana-data:/var/lib/grafana
       - ./dashboards/grafana:/dashboards
@@ -70,6 +71,13 @@ services:
     restart: unless-stopped
     depends_on:
       - prometheus
+
+  mongo-api:
+    networks:
+      - vertiflow-network
+    ports:
+      - "5000:5000"
+    build: ./docker/mongo-api
 
   # Node Exporter - System metrics
   node-exporter:
